@@ -705,16 +705,16 @@ h1, h2, h3 {
     
     .countdown-container {
         flex-wrap: wrap;
-        gap: 16px;
+        gap: 12px;
     }
     
     .countdown-item {
-        min-width: 80px;
-        padding: 16px;
+        min-width: 75px;
+        padding: 12px;
     }
     
     .countdown-number {
-        font-size: 32px;
+        font-size: 26px;
     }
     
     .event-grid {
