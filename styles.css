@@ -65,6 +65,129 @@ h1, h2, h3 {
     --success: #28a745;
 }
 
+/* Animaciones de Fondo Sutiles */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: 
+        radial-gradient(circle at 20% 80%, rgba(168, 197, 229, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(212, 175, 55, 0.05) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(94, 138, 184, 0.03) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: -2;
+}
+
+body::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23A8C5E5' fill-opacity='0.02'%3E%3Ccircle cx='30' cy='30' r='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: -1;
+    opacity: 0.5;
+}
+
+/* Flores Flotantes */
+.floating-flowers {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: -1;
+}
+
+.floating-flower {
+    position: absolute;
+    color: #A8C5E5;
+    font-size: 16px;
+    opacity: 0.3;
+    animation: floatFlower 20s infinite linear;
+    filter: blur(0.3px);
+}
+
+.floating-flower:nth-child(1) {
+    left: 10%;
+    animation-delay: -2s;
+    animation-duration: 25s;
+}
+
+.floating-flower:nth-child(2) {
+    left: 30%;
+    animation-delay: -8s;
+    animation-duration: 22s;
+}
+
+.floating-flower:nth-child(3) {
+    left: 50%;
+    animation-delay: -15s;
+    animation-duration: 28s;
+}
+
+.floating-flower:nth-child(4) {
+    left: 70%;
+    animation-delay: -5s;
+    animation-duration: 24s;
+}
+
+.floating-flower:nth-child(5) {
+    left: 90%;
+    animation-delay: -12s;
+    animation-duration: 26s;
+}
+
+@keyframes floatFlower {
+    0% {
+        transform: translateY(100vh) rotate(0deg);
+        opacity: 0;
+    }
+    5% {
+        opacity: 0.3;
+    }
+    95% {
+        opacity: 0.3;
+    }
+    100% {
+        transform: translateY(-10vh) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+/* Brillos sutiles */
+body::after {
+    background-image: 
+        url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23D4AF37' fill-opacity='0.01'%3E%3Ccircle cx='30' cy='30' r='1'/%3E%3C/g%3E%3Cg fill='%235E8AB8' fill-opacity='0.005'%3E%3Ccircle cx='15' cy='15' r='0.5'/%3E%3Ccircle cx='45' cy='45' r='0.5'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* Respetar preferencias de movimiento reducido */
+@media (prefers-reduced-motion: reduce) {
+    .floating-flower {
+        animation: none;
+    }
+    
+    body::before,
+    body::after {
+        background: #FDFDFD;
+    }
+    
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
 /* Spacing System */
 .container {
     max-width: 1100px;
@@ -690,6 +813,95 @@ h1, h2, h3 {
         opacity: 1;
         transform: translateY(0);
     }
+}
+
+/* Estilos para Agradecimientos */
+.thanks-section {
+    background: linear-gradient(135deg, var(--primary-100) 0%, #F8FAFC 100%);
+    padding: 96px 0;
+}
+
+.thanks-list {
+    margin-top: 24px;
+}
+
+.thanks-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 16px 0;
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+.thanks-item:hover {
+    background: rgba(255, 255, 255, 1);
+    transform: translateX(8px);
+    box-shadow: 0 4px 12px rgba(168, 197, 229, 0.15);
+}
+
+.thanks-icon {
+    font-size: 20px;
+    min-width: 24px;
+}
+
+/* Estilos para Social Photos */
+.social-photos-section {
+    background: linear-gradient(135deg, #F8FAFC 0%, var(--primary-100) 100%);
+    padding: 96px 0;
+}
+
+.social-card {
+    text-align: center;
+    background: linear-gradient(145deg, #ffffff 0%, rgba(168, 197, 229, 0.05) 100%);
+}
+
+.social-hashtag {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+    margin: 24px 0;
+}
+
+.hashtag {
+    background: linear-gradient(135deg, var(--primary-500), var(--primary-700));
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: transform 0.3s ease;
+}
+
+.hashtag:hover {
+    transform: scale(1.05);
+}
+
+.google-photos-link {
+    margin-top: 24px;
+}
+
+.google-photos-link a {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--primary-700);
+    text-decoration: none;
+    font-weight: 500;
+    padding: 12px 24px;
+    border: 2px solid var(--primary-500);
+    border-radius: 25px;
+    transition: all 0.3s ease;
+}
+
+.google-photos-link a:hover {
+    background: var(--primary-500);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(168, 197, 229, 0.3);
 }
 
 /* Responsive Design */

@@ -322,6 +322,9 @@ document.addEventListener('DOMContentLoaded', function() {
         // Initialize scroll animations
         initializeScrollAnimations();
         
+        // Initialize floating flowers
+        createFloatingFlowers();
+        
         // Initialize performance optimizations
         initializePerformanceOptimizations();
         
@@ -399,6 +402,45 @@ document.addEventListener('DOMContentLoaded', function() {
         handleErrors(error, 'initialization');
     }
 });
+
+// Función para crear flores flotantes
+function createFloatingFlowers() {
+    // Verificar si el usuario prefiere movimiento reducido
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        return;
+    }
+    
+    const flowerSymbols = ['🌸', '🌺', '🌻', '🌷', '💐', '💮'];
+    const container = document.createElement('div');
+    container.className = 'floating-flowers';
+    document.body.appendChild(container);
+    
+    // Crear 15 flores distribuidas en diferentes posiciones
+    for (let i = 0; i < 15; i++) {
+        setTimeout(() => {
+            const flower = document.createElement('div');
+            flower.className = 'floating-flower';
+            flower.textContent = flowerSymbols[Math.floor(Math.random() * flowerSymbols.length)];
+            
+            // Posición aleatoria horizontal
+            flower.style.left = Math.random() * 100 + '%';
+            
+            // Duración de animación aleatoria (20-35 segundos)
+            const duration = 20 + Math.random() * 15;
+            flower.style.animationDuration = duration + 's';
+            
+            // Retraso aleatorio (0-20 segundos)
+            const delay = Math.random() * 20;
+            flower.style.animationDelay = delay + 's';
+            
+            // Tamaño aleatorio
+            const size = 12 + Math.random() * 8;
+            flower.style.fontSize = size + 'px';
+            
+            container.appendChild(flower);
+        }, i * 2000); // Crear una nueva flor cada 2 segundos
+    }
+}
 
 // Window load optimizations
 window.addEventListener('load', function() {
