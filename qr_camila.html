@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR para Sitio de Camila</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 500px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            padding: 40px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 2em;
+        }
+
+        .qr-container {
+            margin: 30px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .qr-container img {
+            max-width: 300px;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .instructions {
+            background: #e8f4fd;
+            border: 1px solid #bee5eb;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 25px;
+            color: #0c5460;
+            font-size: 14px;
+        }
+
+        .url-display {
+            background: #f1f3f4;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-family: monospace;
+            color: #5f6368;
+            word-break: break-all;
+        }
+
+        .download-btn {
+            background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px;
+            transition: transform 0.2s ease;
+        }
+
+        .download-btn:hover {
+            transform: translateY(-2px);
+            background: linear-gradient(135deg, #229954 0%, #1e8449 100%);
+        }
+
+        .edit-url-btn {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .url-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            font-size: 16px;
+            margin: 15px 0;
+            display: none;
+        }
+
+        .actions {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>💖 Código QR para Camila</h1>
+        
+        <div class="instructions">
+            <p><strong>¡Código QR listo para usar!</strong></p>
+            <p>Este código QR dirige al sitio web de quinceañera de Camila.</p>
+            <p>Úsalo en las invitaciones físicas para que los invitados puedan acceder fácilmente al sitio web.</p>
+        </div>
+
+        <div class="url-display" id="urlDisplay">
+            <strong>URL:</strong> <span id="currentUrl">https://tu-sitio-web.com</span>
+        </div>
+
+        <input type="url" id="urlInput" class="url-input" placeholder="https://tu-sitio-web.com">
+
+        <div class="qr-container">
+            <div id="qrImage"></div>
+        </div>
+
+        <div class="actions">
+            <button class="download-btn" id="downloadBtn" onclick="downloadQR()">
+                💾 Descargar Código QR
+            </button>
+            <br>
+            <button class="edit-url-btn" id="editBtn" onclick="editURL()">
+                ✏️ Cambiar URL
+            </button>
+            <button class="edit-url-btn" id="saveBtn" onclick="saveURL()" style="display: none;">
+                ✅ Guardar
+            </button>
+            <button class="edit-url-btn" id="cancelBtn" onclick="cancelEdit()" style="display: none;">
+                ❌ Cancelar
+            </button>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <script>
+        let currentQR = null;
+        let originalUrl = 'https://tu-sitio-web.com';
+
+        // Load saved URL from localStorage
+        window.addEventListener('DOMContentLoaded', function() {
+            const savedUrl = localStorage.getItem('camilaSiteUrl');
+            if (savedUrl) {
+                originalUrl = savedUrl;
+                document.getElementById('currentUrl').textContent = savedUrl;
+                generateQR(savedUrl);
+            } else {
+                generateQR(originalUrl);
+            }
+        });
+
+        async function generateQR(url) {
+            const qrImage = document.getElementById('qrImage');
+            
+            try {
+                // Generate QR code
+                const qrDataURL = await QRCode.toDataURL(url, {
+                    width: 300,
+                    margin: 2,
+                    color: {
+                        dark: '#8B4513',  // Brown color matching quinceañera theme
+                        light: '#FFFFFF'
+                    }
+                });
+
+                // Display QR code
+                qrImage.innerHTML = `<img src="${qrDataURL}" alt="Código QR para el sitio de Camila">`;
+                currentQR = qrDataURL;
+
+            } catch (error) {
+                console.error('Error generando QR:', error);
+                qrImage.innerHTML = '<p style="color: red;">Error al generar el código QR</p>';
+            }
+        }
+
+        function downloadQR() {
+            if (!currentQR) {
+                alert('No hay código QR para descargar');
+                return;
+            }
+
+            const link = document.createElement('a');
+            link.href = currentQR;
+            link.download = 'camila-quinceañera-qr.png';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function editURL() {
+            const urlDisplay = document.getElementById('urlDisplay');
+            const urlInput = document.getElementById('urlInput');
+            const editBtn = document.getElementById('editBtn');
+            const saveBtn = document.getElementById('saveBtn');
+            const cancelBtn = document.getElementById('cancelBtn');
+
+            urlInput.value = document.getElementById('currentUrl').textContent;
+            urlDisplay.style.display = 'none';
+            urlInput.style.display = 'block';
+            editBtn.style.display = 'none';
+            saveBtn.style.display = 'inline-block';
+            cancelBtn.style.display = 'inline-block';
+            urlInput.focus();
+        }
+
+        function saveURL() {
+            const newUrl = document.getElementById('urlInput').value.trim();
+            
+            if (!newUrl) {
+                alert('Por favor ingresa una URL válida');
+                return;
+            }
+
+            // Validate URL format
+            try {
+                new URL(newUrl);
+            } catch {
+                alert('Por favor ingresa una URL válida (incluye http:// o https://)');
+                return;
+            }
+
+            // Save URL
+            localStorage.setItem('camilaSiteUrl', newUrl);
+            originalUrl = newUrl;
+            
+            // Update display
+            document.getElementById('currentUrl').textContent = newUrl;
+            
+            // Generate new QR
+            generateQR(newUrl);
+            
+            // Restore UI
+            cancelEdit();
+            
+            alert('¡URL actualizada y código QR regenerado!');
+        }
+
+        function cancelEdit() {
+            const urlDisplay = document.getElementById('urlDisplay');
+            const urlInput = document.getElementById('urlInput');
+            const editBtn = document.getElementById('editBtn');
+            const saveBtn = document.getElementById('saveBtn');
+            const cancelBtn = document.getElementById('cancelBtn');
+
+            urlDisplay.style.display = 'block';
+            urlInput.style.display = 'none';
+            editBtn.style.display = 'inline-block';
+            saveBtn.style.display = 'none';
+            cancelBtn.style.display = 'none';
+        }
+
+        // Allow Enter key to save
+        document.getElementById('urlInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                saveURL();
+            }
+        });
+    </script>
+</body>
+</html>

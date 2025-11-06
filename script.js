@@ -459,6 +459,64 @@ document.addEventListener('visibilitychange', function() {
     }
 });
 
+// Fixed Header Functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const fixedHeader = document.getElementById('fixedHeader');
+    const heroSection = document.getElementById('inicio');
+    const headerLinks = document.querySelectorAll('.header-link');
+    
+    // Function to check if hero section is fully passed
+    function isHeroSectionPassed() {
+        const heroHeight = heroSection.offsetHeight;
+        const scrollPosition = window.pageYOffset;
+        return scrollPosition > heroHeight;
+    }
+    
+    // Function to update header visibility
+    function updateHeaderVisibility() {
+        if (isHeroSectionPassed()) {
+            fixedHeader.classList.add('visible');
+            document.body.classList.add('header-visible');
+        } else {
+            fixedHeader.classList.remove('visible');
+            document.body.classList.remove('header-visible');
+        }
+    }
+    
+    // Function to handle smooth scrolling
+    function scrollToSection(targetId) {
+        const targetElement = document.getElementById(targetId);
+        if (targetElement) {
+            const headerHeight = fixedHeader.offsetHeight;
+            const targetPosition = targetElement.offsetTop - headerHeight - 20;
+            
+            window.scrollTo({
+                top: targetPosition,
+                behavior: 'smooth'
+            });
+        }
+    }
+    
+    // Event listeners
+    window.addEventListener('scroll', updateHeaderVisibility);
+    
+    // Navigation links click handlers
+    headerLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const targetId = this.getAttribute('href').substring(1);
+            scrollToSection(targetId);
+            
+            // Update active link
+            headerLinks.forEach(l => l.classList.remove('active'));
+            this.classList.add('active');
+        });
+    });
+    
+    // Initial check
+    updateHeaderVisibility();
+});
+
 // Export functions for testing (if needed)
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = {

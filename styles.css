@@ -1022,6 +1022,111 @@ body::after {
     }
 }
 
+/* Fixed Header Styles */
+.fixed-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background-color: transparent;
+    padding: 15px 0;
+    transition: all 0.3s ease;
+    opacity: 0;
+    visibility: hidden;
+}
+
+.fixed-header.visible {
+    opacity: 1;
+    visibility: visible;
+    background-color: rgba(0, 0, 0, 0.95);
+    backdrop-filter: blur(10px);
+}
+
+body {
+    transition: padding-top 0.3s ease;
+}
+
+body.header-visible {
+    padding-top: 80px;
+}
+
+.fixed-header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.logo-container {
+    flex-shrink: 0;
+}
+
+.header-logo {
+    height: 50px;
+    width: auto;
+    object-fit: contain;
+}
+
+.header-nav {
+    display: flex;
+    gap: 30px;
+    align-items: center;
+}
+
+.header-link {
+    color: #D4AF37;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 16px;
+    padding: 8px 12px;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.header-link:hover {
+    color: #F4E4BC;
+    background-color: rgba(212, 175, 55, 0.1);
+}
+
+.header-link.active {
+    color: #F4E4BC;
+}
+
+/* Mobile responsive for header */
+@media (max-width: 768px) {
+    .fixed-header-content {
+        padding: 0 15px;
+    }
+    
+    .header-nav {
+        gap: 20px;
+    }
+    
+    .header-link {
+        font-size: 14px;
+        padding: 6px 8px;
+    }
+    
+    .header-logo {
+        height: 40px;
+    }
+}
+
+@media (max-width: 480px) {
+    .header-nav {
+        gap: 15px;
+    }
+    
+    .header-link {
+        font-size: 13px;
+        padding: 5px 6px;
+    }
+}
+
 /* Print Styles */
 @media print {
     .music-player {
@@ -1030,131 +1135,5 @@ body::after {
     
     .primary-btn {
         display: none;
-    }
-}
-
-/* Separador Ornamental */
-.ornamental-separator {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 80px;
-    margin: 0;
-    position: relative;
-    padding: 40px 0;
-}
-
-.ornamental-separator::before {
-    content: '';
-    height: 2px;
-    background: linear-gradient(90deg, 
-        transparent 0%, 
-        rgba(212, 175, 55, 0.3) 20%, 
-        #D4AF37 50%, 
-        rgba(212, 175, 55, 0.3) 80%, 
-        transparent 100%);
-    flex-grow: 1;
-    max-width: 400px;
-    min-width: 200px;
-}
-
-.ornamental-separator::after {
-    content: '';
-    width: 12px;
-    height: 12px;
-    background: #D4AF37;
-    border-radius: 50%;
-    margin: 0 30px;
-    position: relative;
-    z-index: 2;
-    box-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
-}
-
-/* Volutas decorativas */
-.ornamental-separator .volute-left,
-.ornamental-separator .volute-right {
-    position: relative;
-    width: 50px;
-    height: 40px;
-}
-
-.ornamental-separator .volute-left::before,
-.ornamental-separator .volute-left::after,
-.ornamental-separator .volute-right::before,
-.ornamental-separator .volute-right::after {
-    content: '';
-    position: absolute;
-    width: 8px;
-    height: 8px;
-    background: #D4AF37;
-    border-radius: 50%;
-    box-shadow: 0 0 5px rgba(212, 175, 55, 0.2);
-}
-
-.ornamental-separator .volute-left::before {
-    top: 8px;
-    left: 15px;
-}
-
-.ornamental-separator .volute-left::after {
-    top: 24px;
-    left: 25px;
-}
-
-.ornamental-separator .volute-right::before {
-    top: 8px;
-    right: 25px;
-}
-
-.ornamental-separator .volute-right::after {
-    top: 24px;
-    right: 15px;
-}
-
-/* Curva decorativa adicional */
-.ornamental-separator .curve-decoration {
-    position: absolute;
-    width: 30px;
-    height: 20px;
-    border: 2px solid #D4AF37;
-    border-top: none;
-    border-right: none;
-    border-radius: 0 0 0 20px;
-    opacity: 0.6;
-}
-
-.ornamental-separator .curve-decoration-right {
-    transform: scaleX(-1);
-    right: 10px;
-    top: 10px;
-}
-
-.ornamental-separator .curve-decoration-left {
-    left: 10px;
-    top: 10px;
-}
-
-/* Versión móvil */
-@media (max-width: 768px) {
-    .ornamental-separator {
-        height: 60px;
-        padding: 30px 0;
-    }
-    
-    .ornamental-separator::before {
-        max-width: 250px;
-        min-width: 150px;
-    }
-    
-    .ornamental-separator::after {
-        margin: 0 20px;
-        width: 10px;
-        height: 10px;
-    }
-    
-    .ornamental-separator .volute-left,
-    .ornamental-separator .volute-right {
-        width: 40px;
-        height: 30px;
     }
 }
