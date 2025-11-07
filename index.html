@@ -318,38 +318,41 @@
         </div>
     </section>
 
-    <!-- RSVP Form Section -->
+    <!-- RSVP Section -->
     <section class="rsvp-section" id="rsvp">
         <div class="container">
             <div class="section-content">
                 <h2 class="section-title">Confirma tu Asistencia</h2>
-                <div class="rsvp-form-container">
-                    <form class="rsvp-form" id="rsvpForm">
-                        <div class="form-group">
-                            <label for="nombre">Nombre completo</label>
-                            <input type="text" id="nombre" name="nombre" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="email">Correo electrónico</label>
-                            <input type="email" id="email" name="email" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="telefono">Teléfono</label>
-                            <input type="tel" id="telefono" name="telefono" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="mensaje">Mensaje (opcional)</label>
-                            <textarea id="mensaje" name="mensaje" rows="3" placeholder="Deja un mensaje especial para Camila..."></textarea>
-                        </div>
-                        <button type="submit" class="primary-btn full-width">Confirmar Asistencia</button>
-                    </form>
-                    <div class="success-message" id="successMessage" style="display: none;">
-                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
-                            <polyline points="22,4 12,14.01 9,11.01"/>
+                <p class="section-subtitle">Para confirmar tu asistencia y recibir tu boleto electrónico, por favor accede al sistema de confirmación</p>
+                <div class="rsvp-button-container">
+                    <a href="sistema-boletos/index.html" class="primary-btn rsvp-button">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
-                        <h3>¡Gracias por confirmar!</h3>
-                        <p>Tu asistencia ha sido registrada. Nos vemos en el evento.</p>
+                        Confirmar Asistencia y Recibir Boleto
+                    </a>
+                </div>
+                <div class="rsvp-info">
+                    <div class="info-item">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <span>Confirma tu asistencia en línea</span>
+                    </div>
+                    <div class="info-item">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                        </svg>
+                        <span>Recibe tu boleto electrónico personalizado</span>
+                    </div>
+                    <div class="info-item">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                            <line x1="16" y1="2" x2="16" y2="6"/>
+                            <line x1="8" y1="2" x2="8" y2="6"/>
+                            <line x1="3" y1="10" x2="21" y2="10"/>
+                        </svg>
+                        <span>Reserva tu lugar en las mesas</span>
                     </div>
                 </div>
             </div>

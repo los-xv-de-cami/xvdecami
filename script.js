@@ -5,11 +5,19 @@ const eventDate = new Date('2026-02-14T19:00:00').getTime();
 const daysElement = document.getElementById('days');
 const hoursElement = document.getElementById('hours');
 const minutesElement = document.getElementById('minutes');
-const rsvpForm = document.getElementById('rsvpForm');
-const successMessage = document.getElementById('successMessage');
+// RSVP elements removed - now using external system
 const musicToggle = document.getElementById('musicToggle');
 const musicPlayer = document.getElementById('musicPlayer');
 const backgroundMusic = document.getElementById('backgroundMusic');
+
+// Helper function to safely get elements
+function getElement(id) {
+    const element = document.getElementById(id);
+    if (!element) {
+        console.warn(`Element with id '${id}' not found`);
+    }
+    return element;
+}
 
 // Countdown Timer Function
 function updateCountdown() {
@@ -50,108 +58,16 @@ function scrollToSection(sectionId) {
     }
 }
 
-// Form Validation and Submission
-function validateForm(formData) {
-    const errors = [];
-    
-    if (!formData.get('nombre') || formData.get('nombre').trim().length < 2) {
-        errors.push('El nombre debe tener al menos 2 caracteres');
-    }
-    
-    const email = formData.get('email');
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!email || !emailRegex.test(email)) {
-        errors.push('Por favor ingresa un correo electrónico válido');
-    }
-    
-    const telefono = formData.get('telefono');
-    const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
-    if (!telefono || telefono.replace(/\D/g, '').length < 7) {
-        errors.push('Por favor ingresa un teléfono válido');
-    }
-    
-    return errors;
-}
-
-function showErrors(errors) {
-    // Remove existing error messages
-    const existingErrors = document.querySelectorAll('.error-message');
-    existingErrors.forEach(error => error.remove());
-    
-    // Create error container if it doesn't exist
-    let errorContainer = document.querySelector('.error-container');
-    if (!errorContainer) {
-        errorContainer = document.createElement('div');
-        errorContainer.className = 'error-container';
-        errorContainer.style.cssText = `
-            background: #fee;
-            border: 1px solid #fcc;
-            color: #c33;
-            padding: 16px;
-            border-radius: 8px;
-            margin-bottom: 24px;
-            display: none;
-        `;
-        rsvpForm.parentNode.insertBefore(errorContainer, rsvpForm);
-    }
-    
-    if (errors.length > 0) {
-        errorContainer.innerHTML = `
-            <strong>Por favor corrige los siguientes errores:</strong>
-            <ul style="margin: 8px 0 0 20px; padding: 0;">
-                ${errors.map(error => `<li>${error}</li>`).join('')}
-            </ul>
-        `;
-        errorContainer.style.display = 'block';
-        return false;
-    } else {
-        errorContainer.style.display = 'none';
-        return true;
-    }
-}
-
-function saveRSVP(formData) {
-    const rsvpData = {
-        nombre: formData.get('nombre').trim(),
-        email: formData.get('email').trim(),
-        telefono: formData.get('telefono').trim(),
-        mensaje: formData.get('mensaje')?.trim() || '',
-        fechaConfirmacion: new Date().toISOString(),
-        evento: 'Camila Hernández - Quinceañera',
-        fechaEvento: '2026-02-14',
-        horaEvento: '19:00'
-    };
-    
-    // Save to localStorage (in a real app, this would be sent to a server)
-    let existingRSVPs = JSON.parse(localStorage.getItem('rsvpData') || '[]');
-    existingRSVPs.push(rsvpData);
-    localStorage.setItem('rsvpData', JSON.stringify(existingRSVPs));
-    
-    // Also save individual confirmation for easy access
-    localStorage.setItem('lastRSVP', JSON.stringify(rsvpData));
-    
-    console.log('RSVP saved:', rsvpData);
-    return rsvpData;
-}
-
-function showSuccessMessage() {
-    rsvpForm.style.display = 'none';
-    successMessage.style.display = 'block';
-    
-    // Add celebration animation
-    successMessage.style.animation = 'fadeInUp 600ms ease-out';
-    
-    // Scroll to success message
-    setTimeout(() => {
-        successMessage.scrollIntoView({
-            behavior: 'smooth',
-            block: 'center'
-        });
-    }, 100);
-}
+// RSVP functions removed - now handled by external system
 
 // Music Player Functions
 function toggleMusic() {
+    // Check if required elements exist
+    if (!backgroundMusic || !musicToggle) {
+        console.warn('Music player elements not found');
+        return;
+    }
+    
     if (backgroundMusic.paused) {
         backgroundMusic.play().catch(e => {
             console.log('Could not play music:', e);
@@ -318,41 +234,20 @@ document.addEventListener('DOMContentLoaded', function() {
         // Initialize scroll animations
         initializeScrollAnimations();
         
-        // Initialize floating flowers
-        createFloatingFlowers();
+        // Initialize floating flowers (only if not in reduced motion)
+        if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            createFloatingFlowers();
+        }
         
         // Initialize performance optimizations
         initializePerformanceOptimizations();
         
-        // RSVP Form submission
-        rsvpForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            try {
-                const formData = new FormData(this);
-                const errors = validateForm(formData);
-                
-                if (showErrors(errors)) {
-                    // Simulate form submission delay
-                    const submitBtn = this.querySelector('button[type="submit"]');
-                    const originalText = submitBtn.textContent;
-                    submitBtn.textContent = 'Confirmando...';
-                    submitBtn.disabled = true;
-                    
-                    setTimeout(() => {
-                        saveRSVP(formData);
-                        showSuccessMessage();
-                        submitBtn.textContent = originalText;
-                        submitBtn.disabled = false;
-                    }, 1500);
-                }
-            } catch (error) {
-                handleErrors(error, 'form submission');
-            }
-        });
+        // RSVP now handled by external system
         
-        // Music player toggle
-        musicToggle.addEventListener('click', toggleMusic);
+        // Music player toggle (only if element exists)
+        if (musicToggle) {
+            musicToggle.addEventListener('click', toggleMusic);
+        }
         
         // Smooth scroll for internal links
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
@@ -376,21 +271,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
         
-        // Check if user has already RSVP'd
-        const lastRSVP = localStorage.getItem('lastRSVP');
-        if (lastRSVP) {
-            const rsvpData = JSON.parse(lastRSVP);
-            const eventDate = new Date('2026-02-14T19:00:00');
-            const today = new Date();
-            
-            // Only show if RSVP was for this event and recent (within 30 days)
-            if (rsvpData.fechaEvento === '2026-02-14' && 
-                (today - new Date(rsvpData.fechaConfirmacion)) < (30 * 24 * 60 * 60 * 1000)) {
-                setTimeout(() => {
-                    showMusicMessage(`¡Gracias por tu confirmación, ${rsvpData.nombre}!`);
-                }, 3000);
-            }
-        }
+        // RSVP now handled by external system
         
         console.log('Invitation initialized successfully');
         
@@ -453,7 +334,8 @@ window.addEventListener('load', function() {
 
 // Handle page visibility changes (for music)
 document.addEventListener('visibilitychange', function() {
-    if (document.hidden && !backgroundMusic.paused) {
+    // Only if music elements exist
+    if (backgroundMusic && musicToggle && document.hidden && !backgroundMusic.paused) {
         backgroundMusic.pause();
         musicToggle.classList.remove('music-playing');
     }
@@ -521,7 +403,6 @@ document.addEventListener('DOMContentLoaded', function() {
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
         updateCountdown,
-        validateForm,
         scrollToSection
     };
 }
