@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagnóstico Ampliado - XV Años de Camila</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 2rem; background: #f5f5f5; }
+        .container { max-width: 1000px; margin: 0 auto; background: white; padding: 2rem; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .test-section { margin: 2rem 0; padding: 1rem; border: 1px solid #ddd; border-radius: 5px; }
+        .test-section.success { background: #d4edda; border-color: #c3e6cb; }
+        .test-section.error { background: #f8d7da; border-color: #f5c6cb; }
+        .test-section.warning { background: #fff3cd; border-color: #ffeaa7; }
+        button { background: #D4AF37; color: white; border: none; padding: 0.5rem 1rem; border-radius: 5px; cursor: pointer; margin: 0.5rem; }
+        button:hover { background: #B8941F; }
+        .result { margin-top: 1rem; padding: 0.5rem; background: #f8f9fa; border-radius: 3px; font-family: monospace; font-size: 12px; max-height: 400px; overflow-y: auto; }
+        pre { background: #f8f9fa; padding: 1rem; border-radius: 5px; overflow-x: auto; white-space: pre-wrap; }
+        .form-input { width: 100%; padding: 0.5rem; margin: 0.5rem 0; border: 1px solid #ddd; border-radius: 4px; }
+        .url-input { font-family: monospace; font-size: 11px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Diagnóstico Ampliado - Google Apps Script</h1>
+        <p>Esta herramienta diagnóstica problemas específicos con el Web App.</p>
+
+        <!-- Configuración de URL -->
+        <div class="test-section">
+            <h3>📋 Configuración de URL del Web App</h3>
+            <p>Pega aquí la URL completa de tu Web App:</p>
+            <input type="text" id="webAppUrl" class="form-input url-input" 
+                   value="https://script.google.com/macros/s/AKfycbxnrOFAIQ9nGKrdw6YcR5_mmM8bLEPlHE1ab0eqAyEqwzyusi4AnEsPr0xcgBXVn5QW/exec"
+                   placeholder="Pega tu URL aquí">
+            <button onclick="updateUrl()">Actualizar URL</button>
+            <div id="urlStatus" class="result" style="display: none;"></div>
+        </div>
+
+        <!-- Test 1: Verificación Básica de GET -->
+        <div class="test-section">
+            <h3>1. Verificación Básica GET</h3>
+            <button onclick="testBasicGet()">Probar GET Básico</button>
+            <div id="basicGetResult" class="result" style="display: none;"></div>
+        </div>
+
+        <!-- Test 2: Verificación de POST con diferentes formatos -->
+        <div class="test-section">
+            <h3>2. Probar POST con Múltiples Formatos</h3>
+            <button onclick="testPostJson()">Probar JSON</button>
+            <button onclick="testPostForm()">Probar FormData</button>
+            <button onclick="testPostText()">Probar Texto Plano</button>
+            <div id="postResult" class="result" style="display: none;"></div>
+        </div>
+
+        <!-- Test 3: Análisis Detallado de Errores -->
+        <div class="test-section">
+            <h3>3. Análisis Detallado de Errores</h3>
+            <button onclick="analyzeError()">Analizar Error</button>
+            <div id="errorResult" class="result" style="display: none;"></div>
+        </div>
+
+        <!-- Test 4: Verificación de CORS -->
+        <div class="test-section">
+            <h3>4. Verificación de CORS</h3>
+            <button onclick="testCORS()">Probar CORS</button>
+            <div id="corsResult" class="result" style="display: none;"></div>
+        </div>
+
+        <!-- Información de Configuración -->
+        <div class="test-section">
+            <h3>📊 Información de Configuración</h3>
+            <div id="configInfo"></div>
+        </div>
+    </div>
+
+    <script>
+        let SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxnrOFAIQ9nGKrdw6YcR5_mmM8bLEPlHE1ab0eqAyEqwzyusi4AnEsPr0xcgBXVn5QW/exec';
+
+        function updateUrl() {
+            const newUrl = document.getElementById('webAppUrl').value.trim();
+            if (newUrl) {
+                SCRIPT_URL = newUrl;
+                const result = document.getElementById('urlStatus');
+                result.style.display = 'block';
+                result.innerHTML = `<h4>✅ URL Actualizada</h4><p>URL configurada: ${SCRIPT_URL}</p>`;
+                result.parentNode.className = 'test-section success';
+                updateConfigInfo();
+            }
+        }
+
+        function updateConfigInfo() {
+            const config = document.getElementById('configInfo');
+            const currentTime = new Date().toLocaleString();
+            config.innerHTML = `
+                <h4>📋 Configuración Actual</h4>
+                <pre>
+URL Web App: ${SCRIPT_URL}
+Tiempo de prueba: ${currentTime}
+Formato de test: JSON con Content-Type: application/json
+                </pre>
+            `;
+        }
+
+        function showResult(elementId, html, isError = false) {
+            const element = document.getElementById(elementId);
+            element.style.display = 'block';
+            element.innerHTML = html;
+            element.parentNode.className = `test-section ${isError ? 'error' : 'success'}`;
+        }
+
+        async function testBasicGet() {
+            const result = document.getElementById('basicGetResult');
+            result.style.display = 'block';
+            result.innerHTML = 'Probando GET básico...';
+
+            try {
+                console.log('URL de prueba:', SCRIPT_URL);
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'GET'
+                });
+
+                console.log('Response status:', response.status);
+                console.log('Response ok:', response.ok);
+                console.log('Response headers:', response.headers);
+
+                if (response.ok) {
+                    const data = await response.text();
+                    console.log('Response data:', data);
+                    showResult('basicGetResult', `
+                        <h4>✅ GET Exitoso</h4>
+                        <p><strong>Status:</strong> ${response.status}</p>
+                        <p><strong>Content-Type:</strong> ${response.headers.get('content-type')}</p>
+                        <pre>${data}</pre>
+                    `);
+                } else {
+                    showResult('basicGetResult', `
+                        <h4>❌ Error GET</h4>
+                        <p><strong>Status:</strong> ${response.status}</p>
+                        <p><strong>Status Text:</strong> ${response.statusText}</p>
+                    `, true);
+                }
+            } catch (error) {
+                console.error('Error en GET:', error);
+                showResult('basicGetResult', `
+                    <h4>❌ Error de Conexión</h4>
+                    <p><strong>Error:</strong> ${error.name}</p>
+                    <p><strong>Mensaje:</strong> ${error.message}</p>
+                    <p><strong>Stack:</strong> ${error.stack}</p>
+                `, true);
+            }
+        }
+
+        async function testPostJson() {
+            const result = document.getElementById('postResult');
+            result.style.display = 'block';
+            result.innerHTML = 'Probando POST con JSON...';
+
+            const testData = {
+                nombre: 'Test Usuario',
+                email: 'test@example.com',
+                telefono: '555-0000',
+                asistencia: 'si',
+                notas: 'Prueba diagnóstica'
+            };
+
+            try {
+                console.log('Enviando datos JSON:', testData);
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(testData)
+                });
+
+                console.log('POST Response status:', response.status);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('POST Response data:', data);
+                    showResult('postResult', `
+                        <h4>✅ POST JSON Exitoso</h4>
+                        <p><strong>Status:</strong> ${response.status}</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `);
+                } else {
+                    const text = await response.text();
+                    showResult('postResult', `
+                        <h4>❌ Error POST JSON</h4>
+                        <p><strong>Status:</strong> ${response.status}</p>
+                        <p><strong>Status Text:</strong> ${response.statusText}</p>
+                        <p><strong>Response:</strong> ${text}</p>
+                    `, true);
+                }
+            } catch (error) {
+                console.error('Error en POST JSON:', error);
+                showResult('postResult', `
+                    <h4>❌ Error POST JSON</h4>
+                    <p><strong>Error:</strong> ${error.name}</p>
+                    <p><strong>Mensaje:</strong> ${error.message}</p>
+                    <p><strong>Tipo:</strong> ${error.constructor.name}</p>
+                `, true);
+            }
+        }
+
+        async function testPostForm() {
+            const result = document.getElementById('postResult');
+            result.style.display = 'block';
+            result.innerHTML = 'Probando POST con FormData...';
+
+            const formData = new FormData();
+            formData.append('nombre', 'Test Usuario');
+            formData.append('email', 'test@example.com');
+            formData.append('telefono', '555-0000');
+            formData.append('asistencia', 'si');
+
+            try {
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    showResult('postResult', `
+                        <h4>✅ POST FormData Exitoso</h4>
+                        <p><strong>Status:</strong> ${response.status}</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `);
+                } else {
+                    const text = await response.text();
+                    showResult('postResult', `
+                        <h4>❌ Error POST FormData</h4>
+                        <p><strong>Status:</strong> ${response.status}</p>
+                        <p><strong>Response:</strong> ${text}</p>
+                    `, true);
+                }
+            } catch (error) {
+                showResult('postResult', `
+                    <h4>❌ Error POST FormData</h4>
+                    <p><strong>Error:</strong> ${error.message}</p>
+                `, true);
+            }
+        }
+
+        async function testPostText() {
+            const result = document.getElementById('postResult');
+            result.style.display = 'block';
+            result.innerHTML = 'Probando POST con texto plano...';
+
+            const textData = 'nombre=Test&email=test@example.com&telefono=555-0000&asistencia=si';
+
+            try {
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: textData
+                });
+
+                if (response.ok) {
+                    const data = await response.text();
+                    showResult('postResult', `
+                        <h4>✅ POST Texto Exitoso</h4>
+                        <p><strong>Status:</strong> ${response.status}</p>
+                        <pre>${data}</pre>
+                    `);
+                } else {
+                    showResult('postResult', `
+                        <h4>❌ Error POST Texto</h4>
+                        <p><strong>Status:</strong> ${response.status}</p>
+                    `, true);
+                }
+            } catch (error) {
+                showResult('postResult', `
+                    <h4>❌ Error POST Texto</h4>
+                    <p><strong>Error:</strong> ${error.message}</p>
+                `, true);
+            }
+        }
+
+        async function analyzeError() {
+            const result = document.getElementById('errorResult');
+            result.style.display = 'block';
+            result.innerHTML = 'Analizando el error...';
+
+            const analysis = `
+                <h4>🔍 Análisis de Configuración</h4>
+                <p><strong>URL:</strong> ${SCRIPT_URL}</p>
+                <p><strong>Timestamp:</strong> ${new Date().toISOString()}</p>
+                <p><strong>Navegador:</strong> ${navigator.userAgent}</p>
+                <p><strong>LocalStorage disponible:</strong> ${typeof(Storage) !== "undefined" ? 'Sí' : 'No'}</p>
+                <p><strong>Cookies habilitadas:</strong> ${navigator.cookieEnabled ? 'Sí' : 'No'}</p>
+                
+                <h5>Posibles causas del "Failed to fetch":</h5>
+                <ul>
+                    <li><strong>URL incorrecta:</strong> Verifica que la URL sea exacta del Web App</li>
+                    <li><strong>Web App no desplegado:</strong> Debe estar en "Cualquiera" (Anyone)</li>
+                    <li><strong>Permisos de cuenta:</strong> Autoriza Google Sheets y Gmail</li>
+                    <li><strong>Función doPost faltante:</strong> Verifica que esté en el script</li>
+                    <li><strong>Formato de datos:</strong> El script espera JSON, no FormData</li>
+                </ul>
+            `;
+
+            showResult('errorResult', analysis);
+        }
+
+        async function testCORS() {
+            const result = document.getElementById('corsResult');
+            result.style.display = 'block';
+            result.innerHTML = 'Verificando CORS...';
+
+            try {
+                // Intentar un request preflight
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'OPTIONS'
+                });
+
+                showResult('corsResult', `
+                    <h4>✅ CORS Verificado</h4>
+                    <p><strong>Status:</strong> ${response.status}</p>
+                    <p><strong>Access-Control-Allow-Origin:</strong> ${response.headers.get('access-control-allow-origin') || 'No especificado'}</p>
+                    <p><strong>Access-Control-Allow-Methods:</strong> ${response.headers.get('access-control-allow-methods') || 'No especificado'}</p>
+                `);
+            } catch (error) {
+                showResult('corsResult', `
+                    <h4>⚠️ CORS Info</h4>
+                    <p>No se pudo hacer OPTIONS (normal para Google Apps Script)</p>
+                    <p><strong>Error:</strong> ${error.message}</p>
+                `);
+            }
+        }
+
+        // Inicializar
+        updateConfigInfo();
+    </script>
+</body>
+</html>
