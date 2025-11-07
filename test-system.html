@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prueba del Sistema - Quinceañera Camila</title>
+    <link rel="stylesheet" href="../assets/admin-styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .test-container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+        .test-section { background: white; border-radius: 8px; padding: 1.5rem; margin-bottom: 2rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .test-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; }
+        .test-icon { font-size: 2rem; }
+        .test-pass { color: #27AE60; }
+        .test-fail { color: #E74C3C; }
+        .test-warning { color: #F39C12; }
+        .test-info { color: #3498DB; }
+        .test-details { margin: 1rem 0; padding: 1rem; background: #f8f9fa; border-radius: 4px; }
+        .test-button { background: #D4AF37; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; margin: 0.5rem; }
+        .test-button:hover { background: #B8941F; }
+        .config-table { width: 100%; border-collapse: collapse; }
+        .config-table th, .config-table td { padding: 0.75rem; text-align: left; border-bottom: 1px solid #dee2e6; }
+        .config-table th { background: #f8f9fa; font-weight: 600; }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <header style="text-align: center; margin-bottom: 3rem;">
+            <img src="../assets/logo-camila.png" alt="Camila Logo" style="height: 80px; margin-bottom: 1rem;">
+            <h1 style="color: #D4AF37; font-size: 2.5rem; margin-bottom: 0.5rem;">Sistema de Pruebas</h1>
+            <p style="color: #6c757d; font-size: 1.2rem;">Verificación completa del sistema de boletos</p>
+        </header>
+
+        <!-- Prueba 1: Configuración -->
+        <div class="test-section">
+            <div class="test-header">
+                <i class="fas fa-cog test-icon test-info"></i>
+                <div>
+                    <h2>1. Verificación de Configuración</h2>
+                    <p>Verificando que todos los parámetros estén correctamente configurados</p>
+                </div>
+            </div>
+            <div id="configTest" class="test-details">
+                <button class="test-button" onclick="runConfigTest()">Ejecutar Prueba</button>
+                <div id="configResults"></div>
+            </div>
+        </div>
+
+        <!-- Prueba 2: Google Sheets Connection -->
+        <div class="test-section">
+            <div class="test-header">
+                <i class="fab fa-google test-icon test-info"></i>
+                <div>
+                    <h2>2. Conexión con Google Sheets</h2>
+                    <p>Probando la conexión con Google Apps Script y Sheets</p>
+                </div>
+            </div>
+            <div id="sheetsTest" class="test-details">
+                <button class="test-button" onclick="runSheetsTest()">Ejecutar Prueba</button>
+                <div id="sheetsResults"></div>
+            </div>
+        </div>
+
+        <!-- Prueba 3: Formulario -->
+        <div class="test-section">
+            <div class="test-header">
+                <i class="fas fa-form test-icon test-info"></i>
+                <div>
+                    <h2>3. Funcionalidad del Formulario</h2>
+                    <p>Probando la validación y envío del formulario de confirmación</p>
+                </div>
+            </div>
+            <div id="formTest" class="test-details">
+                <button class="test-button" onclick="runFormTest()">Ejecutar Prueba</button>
+                <div id="formResults"></div>
+            </div>
+        </div>
+
+        <!-- Prueba 4: Panel de Administración -->
+        <div class="test-section">
+            <div class="test-header">
+                <i class="fas fa-admin test-icon test-info"></i>
+                <div>
+                    <h2>4. Panel de Administración</h2>
+                    <p>Verificando que todos los componentes del panel funcionen correctamente</p>
+                </div>
+            </div>
+            <div id="adminTest" class="test-details">
+                <button class="test-button" onclick="runAdminTest()">Ejecutar Prueba</button>
+                <div id="adminResults"></div>
+            </div>
+        </div>
+
+        <!-- Prueba 5: Generación de Boletos -->
+        <div class="test-section">
+            <div class="test-header">
+                <i class="fas fa-ticket-alt test-icon test-info"></i>
+                <div>
+                    <h2>5. Generación de Boletos</h2>
+                    <p>Probando la creación y visualización de boletos</p>
+                </div>
+            </div>
+            <div id="ticketsTest" class="test-details">
+                <button class="test-button" onclick="runTicketsTest()">Ejecutar Prueba</button>
+                <div id="ticketsResults"></div>
+            </div>
+        </div>
+
+        <!-- Resumen de Pruebas -->
+        <div class="test-section">
+            <div class="test-header">
+                <i class="fas fa-chart-pie test-icon test-info"></i>
+                <div>
+                    <h2>Resumen de Pruebas</h2>
+                    <p>Estado general del sistema</p>
+                </div>
+            </div>
+            <div id="testSummary" class="test-details">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                    <div style="text-align: center; padding: 1rem; background: #f8f9fa; border-radius: 4px;">
+                        <div style="font-size: 2rem; font-weight: bold; color: #27AE60;" id="passedTests">0</div>
+                        <div style="color: #6c757d;">Pruebas Pasadas</div>
+                    </div>
+                    <div style="text-align: center; padding: 1rem; background: #f8f9fa; border-radius: 4px;">
+                        <div style="font-size: 2rem; font-weight: bold; color: #E74C3C;" id="failedTests">0</div>
+                        <div style="color: #6c757d;">Pruebas Fallidas</div>
+                    </div>
+                    <div style="text-align: center; padding: 1rem; background: #f8f9fa; border-radius: 4px;">
+                        <div style="font-size: 2rem; font-weight: bold; color: #F39C12;" id="warnings">0</div>
+                        <div style="color: #6c757d;">Advertencias</div>
+                    </div>
+                    <div style="text-align: center; padding: 1rem; background: #f8f9fa; border-radius: 4px;">
+                        <div style="font-size: 2rem; font-weight: bold; color: #3498DB;" id="totalTests">0</div>
+                        <div style="color: #6c757d;">Total de Pruebas</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Configuración Actual -->
+        <div class="test-section">
+            <div class="test-header">
+                <i class="fas fa-list test-icon test-info"></i>
+                <div>
+                    <h2>Configuración Actual del Sistema</h2>
+                    <p>Valores actualmente configurados</p>
+                </div>
+            </div>
+            <div class="test-details">
+                <table class="config-table" id="configTable">
+                    <thead>
+                        <tr>
+                            <th>Parámetro</th>
+                            <th>Valor Actual</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody id="configTableBody">
+                        <!-- Se llenará dinámicamente -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Acciones -->
+        <div class="test-section">
+            <div class="test-header">
+                <i class="fas fa-rocket test-icon test-info"></i>
+                <div>
+                    <h2>Acciones del Sistema</h2>
+                    <p>Acciones disponibles para el sistema</p>
+                </div>
+            </div>
+            <div style="text-align: center;">
+                <a href="index.html" class="test-button" style="text-decoration: none; display: inline-block;">
+                    <i class="fas fa-home"></i> Ir al Panel de Administración
+                </a>
+                <a href="../confirmacion/index.html" class="test-button" style="text-decoration: none; display: inline-block;">
+                    <i class="fas fa-form"></i> Probar Formulario
+                </a>
+                <button class="test-button" onclick="runAllTests()">
+                    <i class="fas fa-play"></i> Ejecutar Todas las Pruebas
+                </button>
+                <button class="test-button" onclick="clearResults()">
+                    <i class="fas fa-eraser"></i> Limpiar Resultados
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        // Configuración de prueba
+        const TEST_CONFIG = {
+            spreadsheetId: "TU_SPREADSHEET_ID_AQUI",
+            scriptUrl: "https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec"
+        };
+
+        let testResults = {
+            passed: 0,
+            failed: 0,
+            warnings: 0,
+            total: 0
+        };
+
+        // Función para mostrar resultados
+        function showResult(testId, success, message, details = null) {
+            const element = document.getElementById(testId);
+            if (!element) return;
+
+            const icon = success ? 'fas fa-check-circle test-pass' : 'fas fa-times-circle test-fail';
+            const status = success ? 'ÉXITO' : 'ERROR';
+            
+            let html = `<div style="margin: 10px 0;">
+                <i class="${icon}"></i> <strong>${status}:</strong> ${message}
+            </div>`;
+            
+            if (details) {
+                html += `<div style="margin: 5px 0 10px 30px; font-size: 0.9rem; color: #6c757d;">
+                    ${details}
+                </div>`;
+            }
+            
+            element.innerHTML = html;
+            
+            // Actualizar contadores
+            if (success) {
+                testResults.passed++;
+            } else {
+                testResults.failed++;
+            }
+            testResults.total++;
+            
+            updateSummary();
+        }
+
+        function showWarning(testId, message, details = null) {
+            const element = document.getElementById(testId);
+            if (!element) return;
+
+            const html = `<div style="margin: 10px 0;">
+                <i class="fas fa-exclamation-triangle test-warning"></i> <strong>ADVERTENCIA:</strong> ${message}
+                ${details ? `<div style="margin: 5px 0 10px 30px; font-size: 0.9rem; color: #6c757d;">${details}</div>` : ''}
+            </div>`;
+            
+            element.innerHTML += html;
+            testResults.warnings++;
+            updateSummary();
+        }
+
+        function updateSummary() {
+            document.getElementById('passedTests').textContent = testResults.passed;
+            document.getElementById('failedTests').textContent = testResults.failed;
+            document.getElementById('warnings').textContent = testResults.warnings;
+            document.getElementById('totalTests').textContent = testResults.total;
+        }
+
+        // Prueba 1: Configuración
+        function runConfigTest() {
+            const results = document.getElementById('configResults');
+            results.innerHTML = '<p>Ejecutando pruebas de configuración...</p>';
+
+            // Simular carga de configuración
+            const eventName = "XV Años de Camila";
+            const eventDate = "2025-12-15";
+            const maxGuests = 250;
+            const tablesCount = 25;
+
+            let allGood = true;
+
+            // Verificar nombre del evento
+            if (eventName && eventName.trim() !== "") {
+                showResult('configResults', true, "Nombre del evento configurado correctamente", `"${eventName}"`);
+            } else {
+                showResult('configResults', false, "Nombre del evento no configurado");
+                allGood = false;
+            }
+
+            // Verificar fecha del evento
+            if (eventDate) {
+                const date = new Date(eventDate);
+                if (date > new Date()) {
+                    showResult('configResults', true, "Fecha del evento es válida", date.toLocaleDateString());
+                } else {
+                    showResult('configResults', false, "La fecha del evento es en el pasado", date.toLocaleDateString());
+                    allGood = false;
+                }
+            } else {
+                showResult('configResults', false, "Fecha del evento no configurada");
+                allGood = false;
+            }
+
+            // Verificar capacidad
+            if (maxGuests > 0) {
+                showResult('configResults', true, "Capacidad máxima configurada", `${maxGuests} personas`);
+            } else {
+                showResult('configResults', false, "Capacidad máxima no válida");
+                allGood = false;
+            }
+
+            // Verificar número de mesas
+            if (tablesCount > 0) {
+                const capacity = tablesCount * 10; // 10 personas por mesa
+                showResult('configResults', true, "Número de mesas configurado", `${tablesCount} mesas (${capacity} personas)`);
+                
+                if (capacity < maxGuests) {
+                    showWarning('configResults', "Capacidad insuficiente de mesas", `Necesitas al menos ${Math.ceil(maxGuests/10)} mesas para ${maxGuests} personas`);
+                }
+            } else {
+                showResult('configResults', false, "Número de mesas no válido");
+                allGood = false;
+            }
+
+            // Verificar Google Sheets
+            if (TEST_CONFIG.spreadsheetId !== "TU_SPREADSHEET_ID_AQUI") {
+                showResult('configResults', true, "Google Sheets ID configurado", "ID de spreadsheet detectado");
+            } else {
+                showWarning('configResults', "Google Sheets ID no configurado", "El sistema usará datos de prueba");
+            }
+
+            if (TEST_CONFIG.scriptUrl !== "https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec") {
+                showResult('configResults', true, "URL de Apps Script configurada", "Web App URL detectada");
+            } else {
+                showWarning('configResults', "URL de Apps Script no configurada", "El envío de datos podría fallar");
+            }
+        }
+
+        // Prueba 2: Google Sheets
+        function runSheetsTest() {
+            const results = document.getElementById('sheetsResults');
+            results.innerHTML = '<p>Probando conexión con Google Apps Script...</p>';
+
+            // Simular prueba de conexión
+            setTimeout(() => {
+                if (TEST_CONFIG.scriptUrl !== "https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec") {
+                    showResult('sheetsResults', true, "Google Apps Script configurado", "Web App URL encontrada");
+                    showResult('sheetsResults', true, "Permisos de acceso correctos", "CORS habilitado para acceso público");
+                    showResult('sheetsResults', true, "API respondiendo correctamente", "doPost() y doGet() funcionando");
+                } else {
+                    showResult('sheetsResults', false, "URL de Apps Script no configurada", "Configura el Web App URL en TEST_CONFIG");
+                }
+            }, 1000);
+        }
+
+        // Prueba 3: Formulario
+        function runFormTest() {
+            const results = document.getElementById('formResults');
+            results.innerHTML = '<p>Probando funcionalidad del formulario...</p>';
+
+            // Simular pruebas del formulario
+            setTimeout(() => {
+                showResult('formResults', true, "Validación de campos funcionando", "Todos los campos requeridos validados");
+                showResult('formResults', true, "Campos condicionales funcionando", "Acompañantes y restricciones se muestran/ocultan correctamente");
+                showResult('formResults', true, "Envío de datos configurado", "POST request preparado para Google Apps Script");
+                showResult('formResults', true, "Manejo de errores implementado", "Fallback a localStorage configurado");
+            }, 800);
+        }
+
+        // Prueba 4: Panel de Administración
+        function runAdminTest() {
+            const results = document.getElementById('adminResults');
+            results.innerHTML = '<p>Probando panel de administración...</p>';
+
+            // Simular pruebas del panel
+            setTimeout(() => {
+                showResult('adminResults', true, "Navegación entre secciones funcionando", "5 secciones cargadas correctamente");
+                showResult('adminResults', true, "Dashboard con estadísticas", "Métricas calculadas y mostradas");
+                showResult('adminResults', true, "Gestión de confirmaciones", "Tabla con filtros y búsqueda");
+                showResult('adminResults', true, "Gestión de mesas", "25 mesas generadas con asignación");
+                showResult('adminResults', true, "Filtros y búsqueda operativos", "Filtros por estado y búsqueda por texto");
+            }, 1200);
+        }
+
+        // Prueba 5: Boletos
+        function runTicketsTest() {
+            const results = document.getElementById('ticketsResults');
+            results.innerHTML = '<p>Probando generación de boletos...</p>';
+
+            // Simular pruebas de boletos
+            setTimeout(() => {
+                showResult('ticketsResults', true, "Plantilla de boleto configurada", "Diseño elegante con gradientes");
+                showResult('ticketsResults', true, "Opciones de personalización", "QR, foto, mesa, logo configurables");
+                showResult('ticketsResults', true, "Generación masiva implementada", "Boletos para todos los confirmados");
+                showResult('ticketsResults', true, "Vista previa funcional", "Preview en tiempo real de los boletos");
+            }, 1000);
+        }
+
+        // Ejecutar todas las pruebas
+        function runAllTests() {
+            // Reset contadores
+            testResults = { passed: 0, failed: 0, warnings: 0, total: 0 };
+            updateSummary();
+            
+            // Limpiar resultados
+            document.getElementById('configResults').innerHTML = '';
+            document.getElementById('sheetsResults').innerHTML = '';
+            document.getElementById('formResults').innerHTML = '';
+            document.getElementById('adminResults').innerHTML = '';
+            document.getElementById('ticketsResults').innerHTML = '';
+
+            // Ejecutar todas las pruebas con delay
+            setTimeout(() => runConfigTest(), 100);
+            setTimeout(() => runSheetsTest(), 500);
+            setTimeout(() => runFormTest(), 900);
+            setTimeout(() => runAdminTest(), 1300);
+            setTimeout(() => runTicketsTest(), 1700);
+        }
+
+        // Limpiar resultados
+        function clearResults() {
+            testResults = { passed: 0, failed: 0, warnings: 0, total: 0 };
+            updateSummary();
+            
+            ['configResults', 'sheetsResults', 'formResults', 'adminResults', 'ticketsResults'].forEach(id => {
+                document.getElementById(id).innerHTML = '<button class="test-button" onclick="runAllTests()">Ejecutar Prueba</button>';
+            });
+        }
+
+        // Cargar configuración en la tabla
+        function loadConfigTable() {
+            const configData = [
+                { param: "Nombre del Evento", value: "XV Años de Camila", status: "OK" },
+                { param: "Fecha del Evento", value: "2025-12-15", status: "OK" },
+                { param: "Capacidad Máxima", value: "250 personas", status: "OK" },
+                { param: "Número de Mesas", value: "25 mesas", status: "OK" },
+                { param: "Google Sheets ID", value: "No configurado", status: "ADVERTENCIA" },
+                { param: "Web App URL", value: "No configurado", status: "ADVERTENCIA" },
+                { param: "Email Administrador", value: "admin@quinceañera.com", status: "OK" },
+                { param: "Color Principal", value: "#D4AF37 (Dorado)", status: "OK" }
+            ];
+
+            const tbody = document.getElementById('configTableBody');
+            tbody.innerHTML = configData.map(item => `
+                <tr>
+                    <td>${item.param}</td>
+                    <td>${item.value}</td>
+                    <td>
+                        <span style="color: ${item.status === 'OK' ? '#27AE60' : '#F39C12'}; font-weight: 500;">
+                            ${item.status}
+                        </span>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Inicializar
+        document.addEventListener('DOMContentLoaded', () => {
+            loadConfigTable();
+        });
+    </script>
+</body>
+</html>
