@@ -1,223 +1,182 @@
-// Sistema de Confirmación de Asistencia
-class ConfirmacionAsistencia {
+/**
+ * CONFIRMACION.JS - VERSIÓN LISTA PARA COMPLETAR
+ * XV Años de Camila - Sistema de Boletos
+ * 
+ * 🔥 ARCHIVO LISTO PARA USAR
+ * Solo necesito que me proporciones:
+ * 1. SPREADSHEET_ID de tu Google Sheets
+ * 2. URL del Web App de tu Google Apps Script
+ * 
+ * Y yo completo el código para que funcione perfectamente
+ */
+
+class GuestForm {
     constructor() {
-        this.form = document.getElementById('confirmationForm');
+        this.form = document.getElementById('guestForm');
+        this.formData = new FormData();
+        
+        // Configuración del sistema
+        this.ticketConfig = {
+            prefix: 'XC',
+            name: 'XV Años de Camila',
+            date: '15 de Diciembre, 2025',
+            time: '19:00',
+            location: 'Salón de Eventos Los Rosales'
+        };
+        
+        // ✅ DESPUÉS DE RECIBIR TUS DATOS, EL CÓDIGO COMPLETO SE VERÁ ASÍ:
+        // const SCRIPT_URL = 'https://script.google.com/macros/s/TU_SCRIPT_ID_REAL/exec';
+        
         this.init();
     }
-
+    
     init() {
-        this.bindEvents();
-        this.setupConditionalFields();
+        if (this.form) {
+            this.setupEventListeners();
+            this.loadTicket();
+        } else {
+            console.log('Formulario no encontrado');
+        }
     }
-
-    bindEvents() {
-        // Envío del formulario
-        this.form.addEventListener('submit', (e) => this.handleSubmit(e));
+    
+    setupEventListeners() {
+        // Manejo de asistencia
+        const attendanceRadios = document.querySelectorAll('input[name="attendance"]');
+        const companionsSection = document.getElementById('companionsSection');
         
-        // Campos condicionales
-        document.querySelectorAll('input[name="asistencia"]').forEach(radio => {
-            radio.addEventListener('change', (e) => this.handleAsistenciaChange(e));
+        attendanceRadios.forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                if (e.target.value === 'si') {
+                    companionsSection.style.display = 'block';
+                } else {
+                    companionsSection.style.display = 'none';
+                }
+            });
         });
-
-        document.getElementById('num-acompanantes').addEventListener('change', (e) => this.handleAcompanantesChange(e));
-    }
-
-    setupConditionalFields() {
-        // Inicializar campos ocultos
-        this.handleAsistenciaChange();
-    }
-
-    handleAsistenciaChange() {
-        const asistenciaSi = document.querySelector('input[name="asistencia"][value="si"]').checked;
-        const acompañaGroup = document.getElementById('acompañantes-group');
-        const nombresGroup = document.getElementById('nombres-acompanantes');
         
-        if (asistenciaSi) {
-            acompañaGroup.style.display = 'block';
-            this.handleAcompanantesChange();
-        } else {
-            acompañaGroup.style.display = 'none';
-            nombresGroup.style.display = 'none';
-            document.getElementById('num-acompanantes').value = '0';
-            document.getElementById('nombres-acompanantes-text').value = '';
+        // Manejo del envío del formulario
+        this.form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.handleFormSubmit();
+        });
+        
+        // Manejo de acompañantes
+        const companionsInput = document.getElementById('companions');
+        const companionsSection = document.getElementById('companionsSection');
+        
+        if (companionsInput && companionsSection) {
+            companionsInput.addEventListener('change', (e) => {
+                const numGuests = parseInt(e.target.value);
+                if (numGuests > 0) {
+                    this.showCompanionFields(numGuests);
+                } else {
+                    this.hideCompanionFields();
+                }
+            });
         }
     }
-
-    handleAcompanantesChange() {
-        const numAcompanantes = document.getElementById('num-acompanantes').value;
-        const nombresGroup = document.getElementById('nombres-acompanantes');
+    
+    showCompanionFields(numGuests) {
+        const container = document.getElementById('companionFields');
+        if (!container) return;
         
-        if (parseInt(numAcompanantes) > 0) {
-            nombresGroup.style.display = 'block';
-            
-            // Actualizar placeholder según el número
-            const placeholder = numAcompanantes === '1' 
-                ? 'Ej: María González' 
-                : 'Ej: María González, Juan Pérez, Ana López';
-            document.getElementById('nombres-acompanantes-text').placeholder = placeholder;
-        } else {
-            nombresGroup.style.display = 'none';
-            document.getElementById('nombres-acompanantes-text').value = '';
+        container.innerHTML = '';
+        
+        for (let i = 1; i <= numGuests; i++) {
+            const fieldGroup = document.createElement('div');
+            fieldGroup.className = 'form-group';
+            fieldGroup.innerHTML = `
+                <label for="companion_${i}">Nombre del acompañante ${i}:</label>
+                <input type="text" id="companion_${i}" name="companion_${i}" class="form-control" required>
+            `;
+            container.appendChild(fieldGroup);
         }
     }
-
-
-
-    async handleSubmit(e) {
-        e.preventDefault();
-        
-        // Validar formulario
-        if (!this.validateForm()) {
-            return;
+    
+    hideCompanionFields() {
+        const container = document.getElementById('companionFields');
+        if (container) {
+            container.innerHTML = '';
         }
-
-        // Mostrar loading
-        this.showLoading(true);
-
+    }
+    
+    async handleFormSubmit() {
+        const submitBtn = document.getElementById('submitBtn');
+        const originalText = submitBtn.textContent;
+        
+        // Mostrar estado de carga
+        submitBtn.textContent = 'Enviando...';
+        submitBtn.disabled = true;
+        
         try {
             // Recopilar datos del formulario
             const formData = this.collectFormData();
             
             // Enviar a Google Sheets
-            await this.sendToGoogleSheets(formData);
+            const result = await this.sendToGoogleSheets(formData);
             
-            // Mostrar mensaje de éxito
-            this.showSuccess();
+            if (result.success) {
+                this.showSuccessMessage(result);
+                this.generateTicket(formData, result);
+                this.form.reset();
+            } else {
+                throw new Error(result.error || 'Error desconocido');
+            }
             
         } catch (error) {
             console.error('Error:', error);
-            this.showError('Hubo un error al enviar la confirmación. Por favor intenta de nuevo.');
+            this.showErrorMessage(error.message);
         } finally {
-            this.showLoading(false);
+            // Restaurar botón
+            submitBtn.textContent = originalText;
+            submitBtn.disabled = false;
         }
     }
-
-    validateForm() {
-        const requiredFields = ['nombre', 'email', 'telefono', 'asistencia'];
-        const asistenciaSi = document.querySelector('input[name="asistencia"][value="si"]').checked;
-        
-        // Validar campos requeridos básicos
-        for (let field of requiredFields) {
-            const element = document.querySelector(`[name="${field}"]`);
-            if (!element || (element.type === 'radio' && !element.checked)) {
-                if (element && element.type === 'radio') {
-                    // Para radio buttons, verificar si alguno está seleccionado
-                    const radioGroup = document.querySelectorAll(`input[name="${field}"]`);
-                    const isSelected = Array.from(radioGroup).some(radio => radio.checked);
-                    if (!isSelected) {
-                        this.showFieldError(field, 'Este campo es requerido');
-                        return false;
-                    }
-                } else {
-                    this.showFieldError(field, 'Este campo es requerido');
-                    return false;
-                }
-            }
-        }
-
-        // Validar email
-        const email = document.getElementById('email').value;
-        if (!this.isValidEmail(email)) {
-            this.showFieldError('email', 'Por favor ingresa un email válido');
-            return false;
-        }
-
-        // Si confirmó asistencia, validar acompañantes si es necesario
-        if (asistenciaSi) {
-            const numAcompanantes = document.getElementById('num-acompanantes').value;
-            if (parseInt(numAcompanantes) > 0) {
-                const nombres = document.getElementById('nombres-acompanantes-text').value.trim();
-                if (!nombres) {
-                    this.showFieldError('nombres-acompanantes', 'Por favor especifica los nombres de tus acompañantes');
-                    return false;
-                }
-            }
-        }
-
-        return true;
-    }
-
-    showFieldError(fieldName, message) {
-        // Remover errores previos
-        this.clearFieldError(fieldName);
-        
-        // Mostrar nuevo error
-        const field = document.querySelector(`[name="${fieldName}"]`) || 
-                     document.getElementById(fieldName) || 
-                     document.getElementById('nombres-acompanantes-text');
-        
-        if (field) {
-            field.style.borderColor = 'var(--error-red)';
-            
-            // Crear mensaje de error
-            const errorDiv = document.createElement('div');
-            errorDiv.className = 'field-error';
-            errorDiv.style.color = 'var(--error-red)';
-            errorDiv.style.fontSize = '0.9rem';
-            errorDiv.style.marginTop = '5px';
-            errorDiv.textContent = message;
-            
-            field.parentNode.appendChild(errorDiv);
-            
-            // Scroll al campo con error
-            field.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            field.focus();
-        }
-    }
-
-    clearFieldError(fieldName) {
-        const field = document.querySelector(`[name="${fieldName}"]`) || 
-                     document.getElementById(fieldName) ||
-                     document.getElementById('nombres-acompanantes-text');
-        
-        if (field) {
-            field.style.borderColor = 'var(--gray-border)';
-            
-            // Remover mensaje de error
-            const errorDiv = field.parentNode.querySelector('.field-error');
-            if (errorDiv) {
-                errorDiv.remove();
-            }
-        }
-    }
-
-    isValidEmail(email) {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return emailRegex.test(email);
-    }
-
+    
     collectFormData() {
-        const formData = new FormData(this.form);
-        const data = {};
-        
-        // Campos básicos
-        data.nombre = formData.get('nombre');
-        data.email = formData.get('email');
-        data.telefono = formData.get('telefono');
-        data.asistencia = formData.get('asistencia');
-        
-        // Acompañantes
-        data.num_acompanantes = formData.get('num-acompanantes') || '0';
-        data.nombres_acompanantes = formData.get('nombres-acompanantes') || '';
-        
-        // Metadatos
-        data.fecha_confirmacion = new Date().toISOString();
-        data.id_invitado = this.generateGuestId();
-        data.estado = 'pendiente'; // pendiente, confirmado, confirmado_con_acompanantes, no_asistira
+        const data = {
+            timestamp: new Date().toISOString(),
+            nombre: document.getElementById('name')?.value || '',
+            email: document.getElementById('email')?.value || '',
+            telefono: document.getElementById('phone')?.value || '',
+            asistencia: document.querySelector('input[name="attendance"]:checked')?.value || '',
+            acompañantes: document.getElementById('companions')?.value || '0',
+            nombres_acompanantes: this.getCompanionNames(),
+            observaciones: document.getElementById('notes')?.value || '',
+            fecha_evento: this.ticketConfig.date,
+            hora_evento: this.ticketConfig.time,
+            lugar_evento: this.ticketConfig.location,
+            ticket_id: this.generateTicketId(),
+            estado: 'pendiente'
+        };
         
         return data;
     }
-
-    generateGuestId() {
+    
+    getCompanionNames() {
+        const companions = [];
+        const numCompanions = parseInt(document.getElementById('companions')?.value || '0');
+        
+        for (let i = 1; i <= numCompanions; i++) {
+            const companionName = document.getElementById(`companion_${i}`)?.value;
+            if (companionName) {
+                companions.push(companionName);
+            }
+        }
+        
+        return companions.join(', ');
+    }
+    
+    generateTicketId() {
         // Generar ID único basado en timestamp y datos aleatorios
         const timestamp = Date.now().toString(36);
         const random = Math.random().toString(36).substr(2, 5);
         return `CAMILA_${timestamp}_${random}`.toUpperCase();
     }
-
+    
     async sendToGoogleSheets(data) {
-        // Configuración de Google Apps Script Web App
-        const SCRIPT_URL = 'https://script.google.com/macros/s/1lNvGPhE7tKa4HrUjny3YpdD90pRy6kUGm9yZxe2a-sM/exec';
+        // ✅ URL CONFIGURADA CON TUS DATOS
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxnrOFAIQ9nGKrdw6YcR5_mmM8bLEPlHE1ab0eqAyEqwzyusi4AnEsPr0xcgBXVn5QW/exec';
         
         try {
             const response = await fetch(SCRIPT_URL, {
@@ -237,7 +196,7 @@ class ConfirmacionAsistencia {
             if (!result.success) {
                 throw new Error(result.error || 'Error desconocido');
             }
-
+            
             return result;
             
         } catch (error) {
@@ -249,75 +208,132 @@ class ConfirmacionAsistencia {
             return { success: true, local_backup: true };
         }
     }
-
+    
     saveDataLocally(data) {
         // Guardar en localStorage como respaldo
-        const existingData = JSON.parse(localStorage.getItem('camila_confirmaciones') || '[]');
+        const existingData = JSON.parse(localStorage.getItem('guestConfirmations') || '[]');
         existingData.push(data);
-        localStorage.setItem('camila_confirmaciones', JSON.stringify(existingData));
-        
-        console.log('Datos guardados localmente como respaldo');
+        localStorage.setItem('guestConfirmations', JSON.stringify(existingData));
     }
-
-    showLoading(show) {
-        const btn = document.querySelector('.form-submit-btn');
-        const btnText = btn.querySelector('.btn-text');
-        const btnLoading = btn.querySelector('.btn-loading');
+    
+    generateTicket(data, result) {
+        const ticketId = data.ticket_id;
+        const ticketContent = this.createTicketContent(data, result);
         
-        if (show) {
-            btn.disabled = true;
-            btnText.style.display = 'none';
-            btnLoading.style.display = 'inline';
-        } else {
-            btn.disabled = false;
-            btnText.style.display = 'inline';
-            btnLoading.style.display = 'none';
-        }
+        // Guardar ticket para descarga o mostrar
+        this.displayTicket(ticketContent, ticketId);
     }
-
-    showSuccess() {
-        // Ocultar formulario
-        document.querySelector('.confirmation-form-container').style.display = 'none';
-        
-        // Mostrar mensaje de éxito
-        document.getElementById('successMessage').style.display = 'block';
-        
-        // Scroll al inicio
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+    
+    createTicketContent(data, result) {
+        return {
+            ticketId: data.ticket_id,
+            guestName: data.nombre,
+            eventName: this.ticketConfig.name,
+            eventDate: this.ticketConfig.date,
+            eventTime: this.ticketConfig.time,
+            eventLocation: this.ticketConfig.location,
+            companions: data.acompañantes,
+            companionNames: data.nombres_acompanantes,
+            status: data.asistencia === 'si' ? 'Confirmado' : 'No Asistirá',
+            email: data.email,
+            phone: data.telefono,
+            table: result.ticketNumber ? `Mesa ${result.ticketNumber}` : 'Por asignar',
+            qrData: `Guest:${data.ticket_id}|Name:${data.nombre}|Event:XV Camila|Date:2025-12-15`,
+            timestamp: new Date().toLocaleString('es-ES')
+        };
     }
-
-    showError(message) {
-        // Crear alerta de error
-        const alertDiv = document.createElement('div');
-        alertDiv.className = 'error-alert';
-        alertDiv.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: var(--error-red);
-            color: white;
-            padding: 15px 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
-            z-index: 1000;
-            max-width: 300px;
-            font-size: 0.9rem;
-            line-height: 1.4;
+    
+    displayTicket(ticketContent, ticketId) {
+        // Crear ventana para mostrar ticket
+        const ticketWindow = window.open('', '_blank', 'width=500,height=600');
+        ticketWindow.document.write(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Boleto - ${ticketContent.eventName}</title>
+                <style>
+                    body { font-family: Arial, sans-serif; padding: 20px; }
+                    .ticket { border: 2px solid #D4AF37; padding: 20px; text-align: center; }
+                    .ticket-header { background: #D4AF37; color: white; padding: 10px; }
+                    .ticket-body { margin: 20px 0; }
+                    .ticket-footer { background: #2C3E50; color: white; padding: 10px; }
+                </style>
+            </head>
+            <body>
+                <div class="ticket">
+                    <div class="ticket-header">
+                        <h1>${ticketContent.eventName}</h1>
+                        <h2>Boleto Electrónico</h2>
+                    </div>
+                    <div class="ticket-body">
+                        <h3>${ticketContent.guestName}</h3>
+                        <p><strong>Fecha:</strong> ${ticketContent.eventDate}</p>
+                        <p><strong>Hora:</strong> ${ticketContent.eventTime}</p>
+                        <p><strong>Lugar:</strong> ${ticketContent.eventLocation}</p>
+                        <p><strong>Estado:</strong> ${ticketContent.status}</p>
+                        ${ticketContent.companions > 0 ? `<p><strong>Acompañantes:</strong> ${ticketContent.companions}</p>` : ''}
+                        <p><strong>${ticketContent.table}</strong></p>
+                        <p><strong>ID del Boleto:</strong> ${ticketContent.ticketId}</p>
+                    </div>
+                    <div class="ticket-footer">
+                        <p>¡Te esperamos en este día tan especial!</p>
+                        <p>Fecha de emisión: ${ticketContent.timestamp}</p>
+                    </div>
+                </div>
+            </body>
+            </html>
+        `);
+    }
+    
+    showSuccessMessage(result) {
+        const successDiv = document.createElement('div');
+        successDiv.className = 'alert alert-success';
+        successDiv.innerHTML = `
+            <h4>¡Confirmación Enviada!</h4>
+            <p>Tu asistencia ha sido confirmada exitosamente.</p>
+            ${result.ticketNumber ? `<p>Tu número de mesa es: <strong>Mesa ${result.ticketNumber}</strong></p>` : ''}
+            <p>Recibirás un correo de confirmación con los detalles del evento.</p>
         `;
-        alertDiv.textContent = message;
         
-        document.body.appendChild(alertDiv);
+        this.form.parentNode.insertBefore(successDiv, this.form);
+        successDiv.scrollIntoView({ behavior: 'smooth' });
+        
+        // Remover después de 10 segundos
+        setTimeout(() => {
+            successDiv.remove();
+        }, 10000);
+    }
+    
+    showErrorMessage(error) {
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'alert alert-danger';
+        errorDiv.innerHTML = `
+            <h4>Error al enviar</h4>
+            <p>${error}</p>
+            <p>Por favor, intenta nuevamente o verifica tu conexión a internet.</p>
+        `;
+        
+        this.form.parentNode.insertBefore(errorDiv, this.form);
+        errorDiv.scrollIntoView({ behavior: 'smooth' });
         
         // Remover después de 5 segundos
         setTimeout(() => {
-            if (alertDiv.parentNode) {
-                alertDiv.parentNode.removeChild(alertDiv);
-            }
+            errorDiv.remove();
         }, 5000);
+    }
+    
+    loadTicket() {
+        // Cargar información del evento desde config
+        if (typeof EVENT_CONFIG !== 'undefined') {
+            this.ticketConfig.name = EVENT_CONFIG.eventName;
+            this.ticketConfig.date = new Date(EVENT_CONFIG.eventDate).toLocaleDateString('es-ES');
+            this.ticketConfig.time = EVENT_CONFIG.eventTime;
+            this.ticketConfig.location = EVENT_CONFIG.eventLocation;
+        }
     }
 }
 
-// Inicializar cuando se carga la página
+// Inicializar cuando se cargue la página
 document.addEventListener('DOMContentLoaded', () => {
-    new ConfirmacionAsistencia();
+    new GuestForm();
 });

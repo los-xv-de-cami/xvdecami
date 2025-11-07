@@ -1,10 +1,23 @@
 /**
- * Archivo de Configuración - Sistema de Boletos Quinceañera
+ * CONFIG.JS ACTUALIZADO CON ESPACIOS ESPECÍFICOS PARA TUS DATOS
+ * XV Años de Camila - Sistema de Boletos
  * 
- * INSTRUCCIONES:
- * 1. Actualiza los valores según tu evento
- * 2. No cambies las claves (keys) de los objetos
- * 3. Guarda este archivo y los cambios se aplicarán automáticamente
+ * 👇👇👇 INSTRUCCIONES PARA COMPLETAR 👇👇👇
+ * 
+ * 1. REEMPLAZAR "TU_SPREADSHEET_ID_REAL" con tu ID de Google Sheets
+ * 2. REEMPLAZAR "TU_URL_WEB_APP_COMPLETA" con tu URL del Web App
+ * 
+ * 📍 CÓMO OBTENER LOS DATOS:
+ * 
+ * 📊 SPREADSHEET_ID:
+ * - Ve a tu Google Sheets
+ * - La URL se ve así: https://docs.google.com/spreadsheets/d/[ESTE_ES_EL_ID]/edit
+ * - Copia todo el ID (larga cadena de letras y números)
+ * 
+ * 🌐 WEB APP URL:
+ * - Ve a tu Google Apps Script
+ * - Implementar → Gestionar implementaciones
+ * - Copia la URL completa que termina en "/exec"
  */
 
 const EVENT_CONFIG = {
@@ -49,12 +62,18 @@ const EVENT_CONFIG = {
     },
     
     // ========================================
-    // GOOGLE SHEETS Y APPS SCRIPT
+    // GOOGLE SHEETS Y APPS SCRIPT - ¡COMPLETAR AQUÍ!
     // ========================================
     sheets: {
-        spreadsheetId: "1lNvGPhE7tKa4HrUjny3YpdD90pRy6kUGm9yZxe2a-sM",     // ACTUALIZAR: ID de tu Google Sheets
-        sheetName: "Confirmaciones",
-        scriptUrl: "https://script.google.com/macros/s/AKfycbxnrOFAIQ9nGKrdw6YcR5_mmM8bLEPlHE1ab0eqAyEqwzyusi4AnEsPr0xcgBXVn5QW/exec"          // ACTUALIZAR: URL del Web App de Apps Script
+        // 👇👇👇 PEGAR TU SPREADSHEET_ID AQUÍ 👇👇👇
+        // Reemplaza "TU_SPREADSHEET_ID_REAL" con tu ID real
+        spreadsheetId: "1lNvGPhE7tKa4HrUjny3YpdD90pRy6kUGm9yZxe2a-sM",     // ✅ CONFIGURADO CON TUS DATOS
+        
+        // 👇👇👇 PEGAR TU URL DEL WEB APP AQUÍ 👇👇👇
+        // Reemplaza "TU_URL_WEB_APP_COMPLETA" con tu URL real
+        scriptUrl: "https://script.google.com/macros/s/AKfycbxnrOFAIQ9nGKrdw6YcR5_mmM8bLEPlHE1ab0eqAyEqwzyusi4AnEsPr0xcgBXVn5QW/exec",        // ✅ CONFIGURADO CON TU URL
+        
+        sheetName: "Confirmaciones"
     },
     
     // ========================================
@@ -78,7 +97,7 @@ const EVENT_CONFIG = {
         requirePhone: true,        // Teléfono obligatorio
         requireName: true,         // Nombre obligatorio
         maxCompanions: 9,         // Máximo acompañantes permitidos
-        allowDietaryRestrictions: true,     // Permitir restricciones alimentarias
+        allowDietaryRestrictions: false,     // Permitir restricciones alimentarias (DESHABILITADO)
         allowSpecialNeeds: true,            // Permitir necesidades especiales
         confirmationMessage: "Gracias por confirmar tu asistencia. Recibirás un correo de confirmación pronto.",
         ticketDeliveryMessage: "Los boletos electrónicos serán enviados unos días antes del evento."
@@ -133,225 +152,31 @@ const EVENT_CONFIG = {
         adminGuestDeclined: "Invitado confirmó que no asistirá",
         adminTableAssigned: "Mesa asignada exitosamente",
         adminTicketsGenerated: "Boletos generados correctamente"
-    },
-    
-    // ========================================
-    // RESTRICCIONES ALIMENTARIAS PERSONALIZADAS
-    // ========================================
-    dietaryOptions: [
-        { value: "vegetariano", label: "Vegetariano" },
-        { value: "vegano", label: "Vegano" },
-        { value: "sin-gluten", label: "Sin gluten" },
-        { value: "sin-lactosa", label: "Sin lactosa" },
-        { value: "diabetes", label: "Diabetes" },
-        { value: "alergia-nueces", label: "Alergia a nueces" },
-        { value: "alergia-mariscos", label: "Alergia a mariscos" },
-        { value: "halal", label: "Alimentación Halal" },
-        { value: "kosher", label: "Alimentación Kosher" },
-        { value: "otra", label: "Otra (especificar)" }
-    ]
+    }
 };
 
-// ========================================
-// FUNCIONES DE UTILIDAD
-// ========================================
-
 /**
- * Actualiza automáticamente la configuración
- * Esta función debe llamarse al cargar las páginas
+ * Función para verificar que la configuración está completa
  */
-function applyEventConfig() {
-    // Aplicar colores CSS
-    const root = document.documentElement;
-    if (root) {
-        Object.entries(EVENT_CONFIG.colors).forEach(([key, value]) => {
-            root.style.setProperty(`--color-${key}`, value);
-        });
+function verificarConfiguracionCompleta() {
+    const errores = [];
+    
+    // Verificar que los placeholders fueron reemplazados
+    if (EVENT_CONFIG.sheets.spreadsheetId === "TU_SPREADSHEET_ID_REAL") {
+        errores.push("❌ SPREADSHEET_ID no configurado - reemplazar con ID real");
     }
     
-    // Actualizar textos del evento
-    const elements = {
-        'event-name': EVENT_CONFIG.eventName,
-        'event-date': formatEventDate(EVENT_CONFIG.eventDate),
-        'event-time': EVENT_CONFIG.eventTime,
-        'event-location': EVENT_CONFIG.eventLocation
-    };
-    
-    Object.entries(elements).forEach(([id, value]) => {
-        const element = document.getElementById(id);
-        if (element) {
-            element.textContent = value;
-        }
-    });
-}
-
-/**
- * Formatea la fecha del evento para mostrar
- * @param {string} dateString - Fecha en formato YYYY-MM-DD
- * @returns {string} Fecha formateada
- */
-function formatEventDate(dateString) {
-    if (!dateString) return '';
-    
-    const date = new Date(dateString);
-    const options = { 
-        weekday: 'long', 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric' 
-    };
-    
-    return date.toLocaleDateString('es-ES', options);
-}
-
-/**
- * Obtiene el tiempo restante hasta el evento
- * @returns {Object} Objeto con días, horas, minutos
- */
-function getTimeUntilEvent() {
-    const eventDateTime = new Date(`${EVENT_CONFIG.eventDate}T${EVENT_CONFIG.eventTime}:00`);
-    const now = new Date();
-    const diff = eventDateTime - now;
-    
-    if (diff <= 0) {
-        return { days: 0, hours: 0, minutes: 0, expired: true };
+    if (EVENT_CONFIG.sheets.scriptUrl === "TU_URL_WEB_APP_COMPLETA") {
+        errores.push("❌ Web App URL no configurada - reemplazar con URL real");
     }
     
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    
-    return { days, hours, minutes, expired: false };
-}
-
-/**
- * Calcula estadísticas del evento
- * @param {Array} guests - Array de invitados
- * @returns {Object} Estadísticas calculadas
- */
-function calculateEventStats(guests) {
-    if (!guests || guests.length === 0) {
-        return {
-            totalInvitations: 0,
-            confirmed: 0,
-            declined: 0,
-            pending: 0,
-            totalGuests: 0,
-            tablesNeeded: 0,
-            dietaryRestrictions: {}
-        };
+    // Verificar formato básico
+    if (errores.length === 0) {
+        console.log("✅ Configuración completa y lista para usar");
+    } else {
+        console.log("🚨 Configuración incompleta:");
+        errores.forEach(error => console.log(error));
     }
     
-    const confirmed = guests.filter(g => g.estado === 'confirmado');
-    const declined = guests.filter(g => g.estado === 'no_asistira');
-    const pending = guests.filter(g => g.estado === 'pendiente');
-    
-    const totalGuests = confirmed.reduce((sum, g) => {
-        return sum + parseInt(g.num_acompanantes) + 1;
-    }, 0);
-    
-    const tablesNeeded = Math.ceil(totalGuests / EVENT_CONFIG.guestsPerTable);
-    
-    // Contar restricciones alimentarias
-    const dietaryRestrictions = {};
-    guests.forEach(guest => {
-        if (guest.restricciones_alimentarias) {
-            const restrictions = guest.restricciones_alimentarias.split(', ');
-            restrictions.forEach(restriction => {
-                const clean = restriction.trim();
-                dietaryRestrictions[clean] = (dietaryRestrictions[clean] || 0) + 1;
-            });
-        }
-    });
-    
-    return {
-        totalInvitations: guests.length,
-        confirmed: confirmed.length,
-        declined: declined.length,
-        pending: pending.length,
-        totalGuests,
-        tablesNeeded,
-        dietaryRestrictions
-    };
-}
-
-/**
- * Valida la configuración antes de usar
- * @returns {Object} Resultado de la validación
- */
-function validateConfig() {
-    const errors = [];
-    const warnings = [];
-    
-    // Verificar información esencial
-    if (!EVENT_CONFIG.eventName.trim()) {
-        errors.push("El nombre del evento es requerido");
-    }
-    
-    if (!EVENT_CONFIG.eventDate) {
-        errors.push("La fecha del evento es requerida");
-    }
-    
-    if (!EVENT_CONFIG.sheets.spreadsheetId) {
-        warnings.push("Spreadsheet ID no configurado - el sistema usará datos de prueba");
-    }
-    
-    if (!EVENT_CONFIG.sheets.scriptUrl) {
-        warnings.push("URL del script no configurada - el envío de datos podría fallar");
-    }
-    
-    // Verificar email
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(EVENT_CONFIG.email.from)) {
-        errors.push("Email de origen no válido");
-    }
-    
-    // Verificar capacidad
-    if (EVENT_CONFIG.maxGuests < 1) {
-        errors.push("La capacidad máxima debe ser al menos 1");
-    }
-    
-    if (EVENT_CONFIG.tablesCount < 1) {
-        errors.push("El número de mesas debe ser al menos 1");
-    }
-    
-    return {
-        isValid: errors.length === 0,
-        errors,
-        warnings
-    };
-}
-
-/**
- * Exporta la configuración para usar en otros archivos
- */
-function exportConfig() {
-    return {
-        ...EVENT_CONFIG,
-        validation: validateConfig(),
-        timeUntilEvent: getTimeUntilEvent(),
-        timestamp: new Date().toISOString()
-    };
-}
-
-// ========================================
-// INICIALIZACIÓN AUTOMÁTICA
-// ========================================
-
-// Aplicar configuración automáticamente cuando se carga la página
-if (typeof document !== 'undefined') {
-    document.addEventListener('DOMContentLoaded', applyEventConfig);
-}
-
-// Para uso en Node.js (si es necesario)
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = {
-        EVENT_CONFIG,
-        applyEventConfig,
-        formatEventDate,
-        getTimeUntilEvent,
-        calculateEventStats,
-        validateConfig,
-        exportConfig
-    };
+    return errores.length === 0;
 }
