@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug - Menú de Mesas</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-result {
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: monospace;
+        }
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        #tableSelect {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🔍 Debug: Menú de Mesas</h1>
+        <p>Este test diagnostica el problema del menú desplegable de mesas.</p>
+        
+        <div class="test-container">
+            <h3>1. Verificar Elemento HTML</h3>
+            <select id="tableSelect" class="form-select">
+                <option value="">Seleccionar mesa</option>
+            </select>
+            <button onclick="verificarElemento()">Verificar Elemento</button>
+            <div id="resultado1"></div>
+        </div>
+
+        <div class="test-container">
+            <h3>2. Simular Función updateTableSelect()</h3>
+            <button onclick="simularUpdateTableSelect()">Simular updateTableSelect()</button>
+            <div id="resultado2"></div>
+        </div>
+
+        <div class="test-container">
+            <h3>3. Debug Completo del AdminPanel</h3>
+            <button onclick="debugCompleto()">Debug Completo</button>
+            <div id="resultado3"></div>
+        </div>
+
+        <div class="test-container">
+            <h3>4. Limpiar Cache y Recargar</h3>
+            <p><strong>Instrucciones:</strong></p>
+            <ol>
+                <li>Presiona <kbd>Ctrl + Shift + R</kbd> (Windows) o <kbd>Cmd + Shift + R</kbd> (Mac) para recargar la página sin cache</li>
+                <li>O presiona <kbd>F12</kbd> para abrir las herramientas de desarrollador</li>
+                <li>En la pestaña "Console", haz clic derecho y selecciona "Clear Console"</li>
+                <li>Presiona <kbd>Ctrl + R</kbd> para recargar</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        // Simular datos de mesas
+        const tables = [];
+        for (let i = 1; i <= 25; i++) {
+            tables.push({
+                number: i,
+                guests: [], // Todas vacías para que aparezcan
+                capacity: 10
+            });
+        }
+
+        function verificarElemento() {
+            const resultado = document.getElementById('resultado1');
+            const select = document.getElementById('tableSelect');
+            
+            if (select) {
+                resultado.innerHTML = `
+                    <div class="success">
+                        ✅ Elemento encontrado: <strong>${select.id}</strong><br>
+                        Tag: <strong>${select.tagName}</strong><br>
+                        Opciones actuales: <strong>${select.options.length}</strong>
+                    </div>
+                `;
+            } else {
+                resultado.innerHTML = `
+                    <div class="error">
+                        ❌ Elemento NO encontrado con id="tableSelect"
+                    </div>
+                `;
+            }
+        }
+
+        function simularUpdateTableSelect() {
+            const resultado = document.getElementById('resultado2');
+            const select = document.getElementById('tableSelect');
+            
+            if (!select) {
+                resultado.innerHTML = `
+                    <div class="error">
+                        ❌ No se puede ejecutar: elemento tableSelect no existe
+                    </div>
+                `;
+                return;
+            }
+
+            try {
+                // Simular la función updateTableSelect()
+                const availableTables = tables.filter(table => table.guests.length < table.capacity);
+                
+                select.innerHTML = '<option value="">Seleccionar mesa</option>' +
+                    availableTables.map(table => `
+                        <option value="${table.number}">Mesa ${table.number} (${table.guests.length}/${table.capacity})</option>
+                    `).join('');
+
+                resultado.innerHTML = `
+                    <div class="success">
+                        ✅ Función ejecutada exitosamente<br>
+                        Mesas disponibles: <strong>${availableTables.length}</strong><br>
+                        Opciones en select: <strong>${select.options.length}</strong><br>
+                        <br><strong>Primeras 3 opciones:</strong><br>
+                        ${Array.from(select.options).slice(1, 4).map(opt => `• ${opt.text}`).join('<br>')}
+                    </div>
+                `;
+
+            } catch (error) {
+                resultado.innerHTML = `
+                    <div class="error">
+                        ❌ Error en la función: <strong>${error.message}</strong>
+                    </div>
+                `;
+            }
+        }
+
+        function debugCompleto() {
+            const resultado = document.getElementById('resultado3');
+            let debugInfo = '';
+            
+            // Verificar si adminPanel existe
+            debugInfo += `<strong>adminPanel existe:</strong> ${typeof adminPanel !== 'undefined' ? '✅ Sí' : '❌ No'}<br>`;
+            
+            if (typeof adminPanel !== 'undefined') {
+                debugInfo += `<strong>adminPanel.tables:</strong> ${adminPanel.tables ? adminPanel.tables.length : 'No definido'}<br>`;
+                debugInfo += `<strong>adminPanel.guests:</strong> ${adminPanel.guests ? adminPanel.guests.length : 'No definido'}<br>`;
+            }
+            
+            // Verificar elemento select
+            const select = document.getElementById('tableSelect');
+            debugInfo += `<strong>Elemento tableSelect:</strong> ${select ? '✅ Existe' : '❌ No existe'}<br>`;
+            
+            // Verificar función updateTableSelect
+            debugInfo += `<strong>updateTableSelect función:</strong> ${typeof adminPanel?.updateTableSelect === 'function' ? '✅ Definida' : '❌ No definida'}<br>`;
+            
+            // Probar ejecución manual
+            if (typeof adminPanel !== 'undefined' && typeof adminPanel.updateTableSelect === 'function') {
+                try {
+                    adminPanel.updateTableSelect();
+                    debugInfo += `<strong>Ejecución manual:</strong> ✅ Exitosa<br>`;
+                    debugInfo += `<strong>Opciones en select después:</strong> ${select?.options.length || 0}<br>`;
+                } catch (error) {
+                    debugInfo += `<strong>Ejecución manual:</strong> ❌ Error: ${error.message}<br>`;
+                }
+            }
+            
+            resultado.innerHTML = `
+                <div class="info">
+                    <strong>Estado del sistema:</strong><br>
+                    ${debugInfo}
+                </div>
+            `;
+        }
+
+        // Verificación automática al cargar
+        window.addEventListener('load', () => {
+            console.log('🔍 Debug de mesas cargado');
+            setTimeout(() => {
+                verificarElemento();
+            }, 500);
+        });
+    </script>
+</body>
+</html>
