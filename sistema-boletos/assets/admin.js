@@ -190,14 +190,22 @@ class AdminPanel {
 
     async loadData() {
         try {
-            // Simular carga de datos (en producción vendría de Google Sheets)
-            this.guests = this.getMockGuests();
+            this.showLoading(true);
+            
+            // Cargar datos reales de Google Sheets
+            await this.loadGuestsFromGoogleSheets();
+            
             this.updateDashboard();
             this.renderGuestsTable();
             this.updateStats();
+            
+            this.showError(''); // Limpiar errores previos
+            
         } catch (error) {
             console.error('Error cargando datos:', error);
-            this.showError('Error al cargar los datos');
+            this.showError('Error al cargar los datos: ' + error.message);
+        } finally {
+            this.showLoading(false);
         }
     }
 
@@ -853,6 +861,91 @@ class AdminPanel {
                 }
             }, 300);
         }, 4000);
+    }
+
+    // ========================================
+    // FUNCIONES DE CARGA DE DATOS DESDE GOOGLE SHEETS
+    // ========================================
+
+    async loadGuestsFromGoogleSheets() {
+        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxnrOFAIQ9nGKrdw6YcR5_mmM8bLEPlHE1ab0eqAyEqwzyusi4AnEsPr0xcgBXVn5QW/exec';
+        
+        try {
+            // Realizar petición GET para obtener datos
+            const response = await fetch(`${WEB_APP_URL}?action=getAllData`, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+            
+            if (result.success && result.data) {
+                this.guests = this.formatGuestsData(result.data);
+            } else {
+                throw new Error(result.error || 'No se pudieron obtener los datos');
+            }
+            
+        } catch (error) {
+            console.error('Error cargando desde Google Sheets:', error);
+            // Fallback a datos mock si falla la conexión
+            this.guests = this.getMockGuests();
+            this.showError('Usando datos de prueba - Error de conexión: ' + error.message);
+        }
+    }
+
+    formatGuestsData(rawData) {
+        // Convertir datos de Google Sheets al formato esperado por el panel
+        if (!Array.isArray(rawData)) return [];
+        
+        return rawData.map((row, index) => {
+            // Saltar header row
+            if (index === 0) return null;
+            
+            return {
+                id: row[0] || `guest_${index}`,
+                nombre: row[1] || '',
+                email: row[2] || '',
+                telefono: row[3] || '',
+                asistencia: row[4] || '',
+                num_acompanantes: row[5] || '0',
+                nombres_acompanantes: row[6] || '',
+                observaciones: row[7] || '',
+                fecha_confirmacion: row[8] || new Date().toISOString(),
+                estado: row[9] || 'pendiente',
+                mesa_asignada: null
+            };
+        }).filter(guest => guest && guest.nombre); // Filtrar filas vacías
+    }
+
+    showLoading(show) {
+        // Mostrar/ocultar indicador de carga
+        const headerRight = document.querySelector('.header-right');
+        if (headerRight) {
+            if (show) {
+                headerRight.style.opacity = '0.5';
+                headerRight.style.pointerEvents = 'none';
+            } else {
+                headerRight.style.opacity = '1';
+                headerRight.style.pointerEvents = 'auto';
+            }
+        }
+        
+        // Actualizar botón de refresh
+        const refreshBtn = document.getElementById('refreshData');
+        if (refreshBtn) {
+            const icon = refreshBtn.querySelector('i');
+            if (show) {
+                icon.className = 'fas fa-spinner fa-spin';
+            } else {
+                icon.className = 'fas fa-sync-alt';
+            }
+        }
     }
 }
 
