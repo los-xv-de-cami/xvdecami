@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug FormData - XV Camila</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
+        .debug-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .request { background: #e3f2fd; }
+        .response { background: #f3e5f5; }
+        .success { background: #e8f5e8; }
+        .error { background: #ffebee; }
+        .warning { background: #fff3e0; }
+        pre { background: #f5f5f5; padding: 10px; border-radius: 3px; overflow-x: auto; font-size: 12px; }
+        button { padding: 10px 15px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .test-controls { text-align: center; margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Debug FormData - Diagnóstico Detallado</h1>
+    <p>Este test diagnóstico identifica exactamente qué está fallando con FormData.</p>
+    
+    <div class="test-controls">
+        <button onclick="debugTest1()">🧪 Test 1: FormData Básico</button>
+        <button onclick="debugTest2()">🧪 Test 2: FormData Completo</button>
+        <button onclick="debugTest3()">🧪 Test 3: FormData con Timing</button>
+        <button onclick="runAllDebugTests()">🚀 Ejecutar Todos</button>
+    </div>
+    
+    <div id="debugResults"></div>
+    
+    <script>
+        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxnrOFAIQ9nGKrdw6YcR5_mmM8bLEPlHE1ab0eqAyEqwzyusi4AnEsPr0xcgBXVn5QW/exec';
+        
+        function addDebugResult(testName, section, status, message, details = '') {
+            const resultsDiv = document.getElementById('debugResults');
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `debug-section ${section}`;
+            
+            const icon = status === 'success' ? '✅' : status === 'error' ? '❌' : status === 'warning' ? '⚠️' : 'ℹ️';
+            
+            resultDiv.innerHTML = `
+                <h3>${icon} ${testName} - ${status.toUpperCase()}</h3>
+                <p><strong>Sección:</strong> ${section.toUpperCase()}</p>
+                <p><strong>Mensaje:</strong> ${message}</p>
+                ${details ? `<pre>${details}</pre>` : ''}
+            `;
+            
+            resultsDiv.appendChild(resultDiv);
+        }
+        
+        async function debugTest1() {
+            document.getElementById('debugResults').innerHTML = '';
+            addDebugResult('Test 1: FormData Básico', 'request', 'info', 'Creando FormData básico...');
+            
+            try {
+                const formData = new FormData();
+                formData.append('nombre', 'Test Básico');
+                formData.append('email', 'test1@debug.com');
+                formData.append('telefono', '555-001');
+                formData.append('asistencia', 'si');
+                
+                addDebugResult('Test 1: FormData Básico', 'request', 'info', 'FormData creado. Enviando petición...');
+                
+                // Log del FormData
+                const formDataObj = {};
+                for (let [key, value] of formData.entries()) {
+                    formDataObj[key] = value;
+                }
+                addDebugResult('Test 1: FormData Básico', 'request', 'info', 'Contenido del FormData:', JSON.stringify(formDataObj, null, 2));
+                
+                const response = await fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                addDebugResult('Test 1: FormData Básico', 'response', 'info', `Status: ${response.status}, StatusText: ${response.statusText}`);
+                
+                const resultText = await response.text();
+                addDebugResult('Test 1: FormData Básico', 'response', 'info', 'Respuesta raw:', resultText);
+                
+                let result;
+                try {
+                    result = JSON.parse(resultText);
+                    if (result.success) {
+                        addDebugResult('Test 1: FormData Básico', 'success', 'success', '✅ FormData básico enviado correctamente');
+                    } else {
+                        addDebugResult('Test 1: FormData Básico', 'error', 'error', `❌ Error del servidor: ${result.error}`);
+                    }
+                } catch (parseError) {
+                    addDebugResult('Test 1: FormData Básico', 'error', 'error', '❌ Error al parsear respuesta JSON', `Error: ${parseError.message}\nRespuesta: ${resultText}`);
+                }
+                
+            } catch (error) {
+                addDebugResult('Test 1: FormData Básico', 'error', 'error', `❌ Error de red: ${error.message}`, error.stack);
+            }
+        }
+        
+        async function debugTest2() {
+            addDebugResult('Test 2: FormData Completo', 'request', 'info', 'Creando FormData completo...');
+            
+            try {
+                const formData = new FormData();
+                formData.append('id_invitado', 'DEBUG_' + Date.now());
+                formData.append('nombre', 'Usuario Debug Completo');
+                formData.append('email', 'debug@completo.com');
+                formData.append('telefono', '+52 55 555-DEBUG');
+                formData.append('asistencia', 'si');
+                formData.append('num_acompanantes', '2');
+                formData.append('nombres_acompanantes', 'Debug Acomp1, Debug Acomp2');
+                formData.append('observaciones', 'Debug de FormData completo - ' + new Date().toISOString());
+                formData.append('fecha_confirmacion', new Date().toISOString());
+                formData.append('estado', 'pendiente');
+                
+                addDebugResult('Test 2: FormData Completo', 'request', 'info', 'FormData completo creado. Enviando...');
+                
+                // Log del FormData
+                const formDataObj = {};
+                for (let [key, value] of formData.entries()) {
+                    formDataObj[key] = value;
+                }
+                addDebugResult('Test 2: FormData Completo', 'request', 'info', 'Contenido completo del FormData:', JSON.stringify(formDataObj, null, 2));
+                
+                const response = await fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                addDebugResult('Test 2: FormData Completo', 'response', 'info', `Status: ${response.status}, StatusText: ${response.statusText}`);
+                
+                const resultText = await response.text();
+                addDebugResult('Test 2: FormData Completo', 'response', 'info', 'Respuesta raw:', resultText);
+                
+                let result;
+                try {
+                    result = JSON.parse(resultText);
+                    if (result.success) {
+                        addDebugResult('Test 2: FormData Completo', 'success', 'success', '✅ FormData completo enviado correctamente');
+                    } else {
+                        addDebugResult('Test 2: FormData Completo', 'error', 'error', `❌ Error del servidor: ${result.error}`);
+                    }
+                } catch (parseError) {
+                    addDebugResult('Test 2: FormData Completo', 'error', 'error', '❌ Error al parsear respuesta JSON', `Error: ${parseError.message}\nRespuesta: ${resultText}`);
+                }
+                
+            } catch (error) {
+                addDebugResult('Test 2: FormData Completo', 'error', 'error', `❌ Error de red: ${error.message}`, error.stack);
+            }
+        }
+        
+        async function debugTest3() {
+            addDebugResult('Test 3: FormData con Timing', 'request', 'info', 'Probando con delays para identificar problemas de timing...');
+            
+            try {
+                // Delay 1 segundo
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                const formData = new FormData();
+                formData.append('test_timing', 'delay_1s');
+                formData.append('timestamp', Date.now().toString());
+                formData.append('nombre', 'Test Timing');
+                
+                addDebugResult('Test 3: FormData con Timing', 'request', 'info', 'Enviando con delay de 1 segundo...');
+                
+                const response = await fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const resultText = await response.text();
+                let result;
+                
+                try {
+                    result = JSON.parse(resultText);
+                    if (result.success) {
+                        addDebugResult('Test 3: FormData con Timing', 'success', 'success', '✅ FormData con timing enviado correctamente');
+                    } else {
+                        addDebugResult('Test 3: FormData con Timing', 'error', 'error', `❌ Error: ${result.error}`);
+                    }
+                } catch (parseError) {
+                    addDebugResult('Test 3: FormData con Timing', 'error', 'error', '❌ Error al parsear respuesta');
+                }
+                
+            } catch (error) {
+                addDebugResult('Test 3: FormData con Timing', 'error', 'error', `❌ Error: ${error.message}`);
+            }
+        }
+        
+        async function runAllDebugTests() {
+            document.getElementById('debugResults').innerHTML = '';
+            addDebugResult('Iniciando Debug', 'request', 'info', 'Ejecutando todos los tests de debug en secuencia...');
+            
+            await debugTest1();
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            
+            await debugTest2();
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            
+            await debugTest3();
+            
+            addDebugResult('Debug Completado', 'request', 'info', 'Todos los tests de debug han sido ejecutados. Revisa los resultados detallados arriba.');
+        }
+        
+        // Ejecutar automáticamente al cargar
+        window.onload = function() {
+            setTimeout(runAllDebugTests, 500);
+        };
+    </script>
+</body>
+</html>
