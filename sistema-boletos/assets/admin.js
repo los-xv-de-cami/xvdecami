@@ -868,7 +868,7 @@ class AdminPanel {
     // ========================================
 
     async loadGuestsFromGoogleSheets() {
-        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxnrOFAIQ9nGKrdw6YcR5_mmM8bLEPlHE1ab0eqAyEqwzyusi4AnEsPr0xcgBXVn5QW/exec';
+        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwJC0xlcc07iB--PzGMDzU08e1FP8nUg1ZOYryuohHxyTkwg4WQAMseA3CoB8p-rKt7/exec';
         
         try {
             // Realizar petición GET para obtener datos
