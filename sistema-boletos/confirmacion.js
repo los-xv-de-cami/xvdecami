@@ -176,7 +176,7 @@ class GuestForm {
     
     async sendToGoogleSheets(data) {
         // ✅ URL CONFIGURADA CON TUS DATOS
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyWqWNsrj4-a3YXpHym8uubF30r3XNwkr_DCvKk6wEYojRWCJoUwuOoukIq8FKC55l5/exec';
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwMs3vV4a15i9KxWqoQAQWCjPI1xyCUh5uWAV1DfM7ZXxosy0VC1RkdPn6xE_bpFqzU/exec';
         
         try {
             // Convertir datos a FormData (formato que funciona con el Web App)
