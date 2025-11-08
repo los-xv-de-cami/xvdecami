@@ -264,6 +264,7 @@ class AdminPanel {
             case 'mesas':
                 this.renderTables();
                 this.updateGuestSelect();
+                this.updateTableSelect();  // ← AGREGADO: Actualiza menú de mesas
                 break;
             case 'boletos':
                 this.updateTicketPreview();
