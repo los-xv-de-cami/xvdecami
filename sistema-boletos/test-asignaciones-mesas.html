@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test - Asignación de Mesas con Google Sheets</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-result {
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: monospace;
+        }
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .progress {
+            width: 100%;
+            height: 20px;
+            background: #f0f0f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #28a745, #20c997);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🎯 Test: Asignación de Mesas con Google Sheets</h1>
+        <p>Este test verifica que las asignaciones de mesas se guarden correctamente en Google Sheets.</p>
+        
+        <div class="progress">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <div id="progressText">Listo para comenzar...</div>
+
+        <div class="test-container">
+            <h3>1. Verificar Conexión con Google Apps Script</h3>
+            <button onclick="testConexion()">Probar Conexión</button>
+            <div id="resultado1"></div>
+        </div>
+
+        <div class="test-container">
+            <h3>2. Cargar Datos Existentes</h3>
+            <button onclick="cargarDatos()">Cargar Confirmaciones</button>
+            <div id="resultado2"></div>
+        </div>
+
+        <div class="test-container">
+            <h3>3. Asignar Mesa de Prueba</h3>
+            <button onclick="asignarMesaPrueba()">Asignar Mesa</button>
+            <div id="resultado3"></div>
+        </div>
+
+        <div class="test-container">
+            <h3>4. Verificar Persistencia</h3>
+            <button onclick="verificarPersistencia()">Recargar y Verificar</button>
+            <div id="resultado4"></div>
+        </div>
+
+        <div class="test-container">
+            <h3>5. Limpiar Asignación de Prueba</h3>
+            <button onclick="limpiarAsignacion()">Limpiar</button>
+            <div id="resultado5"></div>
+        </div>
+    </div>
+
+    <script>
+        let datosCargados = [];
+        let invitadoPrueba = null;
+        let mesaOriginal = null;
+
+        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxnrOFAIQ9nGKrdw6YcR5_mmM8bLEPlHE1ab0eqAyEqwzyusi4AnEsPr0xcgBXVn5QW/exec';
+
+        function updateProgress(percent, text) {
+            document.getElementById('progressBar').style.width = percent + '%';
+            document.getElementById('progressText').textContent = text;
+        }
+
+        async function testConexion() {
+            const resultado = document.getElementById('resultado1');
+            updateProgress(20, 'Probando conexión...');
+            
+            try {
+                const response = await fetch(`${WEB_APP_URL}?action=testConnection`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultado.innerHTML = `
+                        <div class="success">
+                            ✅ <strong>Conexión exitosa</strong><br>
+                            ${data.message}<br>
+                            Spreadsheet: ${data.spreadsheet}<br>
+                            Sheet: ${data.sheet}<br>
+                            Timestamp: ${data.timestamp}
+                        </div>
+                    `;
+                    updateProgress(20, 'Conexión exitosa');
+                } else {
+                    throw new Error(data.error || 'Error desconocido');
+                }
+            } catch (error) {
+                resultado.innerHTML = `
+                    <div class="error">
+                        ❌ <strong>Error de conexión:</strong> ${error.message}
+                    </div>
+                `;
+                updateProgress(0, 'Error de conexión');
+            }
+        }
+
+        async function cargarDatos() {
+            const resultado = document.getElementById('resultado2');
+            updateProgress(40, 'Cargando datos...');
+            
+            try {
+                const response = await fetch(`${WEB_APP_URL}?action=getAllData`);
+                const data = await response.json();
+                
+                if (data.success && data.data) {
+                    datosCargados = data.data.slice(1); // Saltar header
+                    
+                    // Buscar un invitado para la prueba
+                    invitadoPrueba = datosCargados.find(row => row[1] && row[4] === 'si'); // nombre y asistencia sí
+                    
+                    if (invitadoPrueba) {
+                        mesaOriginal = row[10] || ''; // mesa_asignada original
+                        
+                        resultado.innerHTML = `
+                            <div class="success">
+                                ✅ <strong>Datos cargados correctamente</strong><br>
+                                Total de confirmaciones: ${datosCargados.length}<br>
+                                Invitado de prueba: <strong>${invitadoPrueba[1]}</strong><br>
+                                ID: ${invitadoPrueba[0]}<br>
+                                Mesa actual: ${mesaOriginal || 'Sin asignar'}
+                            </div>
+                        `;
+                        updateProgress(40, 'Datos cargados');
+                    } else {
+                        throw new Error('No se encontró invitado confirmado para la prueba');
+                    }
+                } else {
+                    throw new Error(data.error || 'Error cargando datos');
+                }
+            } catch (error) {
+                resultado.innerHTML = `
+                    <div class="error">
+                        ❌ <strong>Error cargando datos:</strong> ${error.message}
+                    </div>
+                `;
+                updateProgress(20, 'Error cargando datos');
+            }
+        }
+
+        async function asignarMesaPrueba() {
+            const resultado = document.getElementById('resultado3');
+            
+            if (!invitadoPrueba) {
+                resultado.innerHTML = `
+                    <div class="error">
+                        ❌ No hay invitado de prueba. Ejecuta "Cargar Datos" primero.
+                    </div>
+                `;
+                return;
+            }
+            
+            updateProgress(60, 'Asignando mesa...');
+            
+            try {
+                const formData = new FormData();
+                formData.append('action', 'updateTableAssignment');
+                formData.append('invitado_id', invitadoPrueba[0]);
+                formData.append('mesa_asignada', '99'); // Mesa de prueba
+
+                const response = await fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultado.innerHTML = `
+                        <div class="success">
+                            ✅ <strong>Asignación exitosa</strong><br>
+                            ${data.message}<br>
+                            Invitado: ${invitadoPrueba[1]}<br>
+                            Mesa asignada: 99<br>
+                            Fila actualizada: ${data.data.row}
+                        </div>
+                    `;
+                    updateProgress(60, 'Mesa asignada');
+                } else {
+                    throw new Error(data.error);
+                }
+            } catch (error) {
+                resultado.innerHTML = `
+                    <div class="error">
+                        ❌ <strong>Error en asignación:</strong> ${error.message}
+                    </div>
+                `;
+                updateProgress(40, 'Error en asignación');
+            }
+        }
+
+        async function verificarPersistencia() {
+            const resultado = document.getElementById('resultado4');
+            updateProgress(80, 'Verificando persistencia...');
+            
+            try {
+                // Recargar datos
+                const response = await fetch(`${WEB_APP_URL}?action=getAllData`);
+                const data = await response.json();
+                
+                if (data.success && data.data) {
+                    const datosNuevos = data.data.slice(1);
+                    const invitadoActualizado = datosNuevos.find(row => row[0] === invitadoPrueba[0]);
+                    
+                    if (invitadoActualizado) {
+                        const mesaActual = invitadoActualizado[10] || '';
+                        
+                        if (mesaActual === '99') {
+                            resultado.innerHTML = `
+                                <div class="success">
+                                    ✅ <strong>Persistencia verificada</strong><br>
+                                    La asignación se guardó correctamente en Google Sheets.<br>
+                                    Invitado: ${invitadoActualizado[1]}<br>
+                                    Mesa asignada: ${mesaActual}<br>
+                                    ✅ Los datos persisten después de recargar
+                                </div>
+                            `;
+                            updateProgress(80, 'Persistencia verificada');
+                        } else {
+                            throw new Error(`Mesa incorrecta: ${mesaActual} (esperado: 99)`);
+                        }
+                    } else {
+                        throw new Error('Invitado no encontrado en datos recargados');
+                    }
+                } else {
+                    throw new Error(data.error);
+                }
+            } catch (error) {
+                resultado.innerHTML = `
+                    <div class="error">
+                        ❌ <strong>Error verificando persistencia:</strong> ${error.message}
+                    </div>
+                `;
+                updateProgress(60, 'Error verificando persistencia');
+            }
+        }
+
+        async function limpiarAsignacion() {
+            const resultado = document.getElementById('resultado5');
+            
+            if (!invitadoPrueba) {
+                resultado.innerHTML = `
+                    <div class="error">
+                        ❌ No hay invitado de prueba para limpiar.
+                    </div>
+                `;
+                return;
+            }
+            
+            updateProgress(100, 'Limpiando asignación...');
+            
+            try {
+                const formData = new FormData();
+                formData.append('action', 'updateTableAssignment');
+                formData.append('invitado_id', invitadoPrueba[0]);
+                formData.append('mesa_asignada', ''); // Limpiar asignación
+
+                const response = await fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultado.innerHTML = `
+                        <div class="success">
+                            ✅ <strong>Limpieza exitosa</strong><br>
+                            ${data.message}<br>
+                            Mesa asignada: (vacía)<br>
+                            La asignación de prueba ha sido eliminada.
+                        </div>
+                    `;
+                    updateProgress(100, 'Test completado');
+                } else {
+                    throw new Error(data.error);
+                }
+            } catch (error) {
+                resultado.innerHTML = `
+                    <div class="error">
+                        ❌ <strong>Error en limpieza:</strong> ${error.message}
+                    </div>
+                `;
+                updateProgress(80, 'Error en limpieza');
+            }
+        }
+
+        // Inicializar
+        window.addEventListener('load', () => {
+            console.log('🎯 Test de asignaciones de mesas cargado');
+            updateProgress(0, 'Listo para comenzar...');
+        });
+    </script>
+</body>
+</html>
