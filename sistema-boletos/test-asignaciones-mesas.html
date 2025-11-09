@@ -217,7 +217,7 @@
                 const formData = new FormData();
                 formData.append('action', 'updateTableAssignment');
                 formData.append('invitado_id', invitadoPrueba[0]);
-                formData.append('mesa_asignada', '99'); // Mesa de prueba
+                formData.append('mesa_asignada', '25'); // Mesa de prueba
 
                 const response = await fetch(WEB_APP_URL, {
                     method: 'POST',
@@ -232,7 +232,7 @@
                             ✅ <strong>Asignación exitosa</strong><br>
                             ${data.message}<br>
                             Invitado: ${invitadoPrueba[1]}<br>
-                            Mesa asignada: 99<br>
+                            Mesa asignada: 25<br>
                             Fila actualizada: ${data.data.row}
                         </div>
                     `;
@@ -266,7 +266,7 @@
                     if (invitadoActualizado) {
                         const mesaActual = invitadoActualizado[10] || '';
                         
-                        if (mesaActual === '99') {
+                        if (mesaActual === '25') {
                             resultado.innerHTML = `
                                 <div class="success">
                                     ✅ <strong>Persistencia verificada</strong><br>
@@ -278,7 +278,7 @@
                             `;
                             updateProgress(80, 'Persistencia verificada');
                         } else {
-                            throw new Error(`Mesa incorrecta: ${mesaActual} (esperado: 99)`);
+                            throw new Error(`Mesa incorrecta: ${mesaActual} (esperado: 25)`);
                         }
                     } else {
                         throw new Error('Invitado no encontrado en datos recargados');
