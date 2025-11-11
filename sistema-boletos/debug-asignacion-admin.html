@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug - Asignación de Mesas Admin</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        .debug-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .log-entry {
+            font-family: monospace;
+            background: #f8f9fa;
+            padding: 10px;
+            margin: 5px 0;
+            border-left: 4px solid #007bff;
+            border-radius: 4px;
+        }
+        .error {
+            border-left-color: #dc3545;
+            background: #fff5f5;
+        }
+        .success {
+            border-left-color: #28a745;
+            background: #f0fff4;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="debug-container">
+        <h1>🔍 Debug - Asignación de Mesas en Admin</h1>
+        <p>Este test intercepta las asignaciones de mesa para verificar qué datos se envían.</p>
+        
+        <div>
+            <button onclick="inicializarDebug()">Inicializar Debug</button>
+            <button onclick="limpiarLogs()">Limpiar Logs</button>
+        </div>
+        
+        <div id="logs"></div>
+    </div>
+
+    <!-- Incluir admin.js para interceptar funciones -->
+    <script src="sistema-boletos/assets/admin.js"></script>
+    
+    <script>
+        // Sistema de logging
+        function log(message, type = 'info') {
+            const logsDiv = document.getElementById('logs');
+            const timestamp = new Date().toLocaleTimeString();
+            const logClass = type === 'error' ? 'error' : type === 'success' ? 'success' : '';
+            
+            logsDiv.innerHTML += `
+                <div class="log-entry ${logClass}">
+                    [${timestamp}] ${message}
+                </div>
+            `;
+            
+            // Scroll automático
+            logsDiv.scrollTop = logsDiv.scrollHeight;
+        }
+
+        function limpiarLogs() {
+            document.getElementById('logs').innerHTML = '';
+        }
+
+        // Interceptar fetch para ver las peticiones HTTP
+        const originalFetch = window.fetch;
+        window.fetch = async function(...args) {
+            const [url, options] = args;
+            
+            if (url.includes('script.google.com') && options && options.body) {
+                log('🔍 Interceptando fetch a Google Apps Script', 'info');
+                log(`URL: ${url}`, 'info');
+                log(`Método: ${options.method}`, 'info');
+                
+                if (options.body instanceof FormData) {
+                    const formData = options.body;
+                    const params = [];
+                    for (let [key, value] of formData.entries()) {
+                        params.push(`${key}: ${value}`);
+                    }
+                    log('FormData enviado: ' + params.join(', '), 'info');
+                }
+            }
+            
+            const response = await originalFetch(...args);
+            return response;
+        };
+
+        // Interceptar console.log para ver mensajes de admin.js
+        const originalConsoleLog = console.log;
+        console.log = function(...args) {
+            const message = args.join(' ');
+            
+            if (message.includes('Asignación guardada') || message.includes('Error guardando') || 
+                message.includes('saveTableAssignment') || message.includes('invitadoId') || 
+                message.includes('mesaAsignada')) {
+                log('📝 Console.log: ' + message, 'info');
+            }
+            
+            originalConsoleLog.apply(console, args);
+        };
+
+        // Interceptar console.error para errores
+        const originalConsoleError = console.error;
+        console.error = function(...args) {
+            const message = args.join(' ');
+            log('❌ Console.error: ' + message, 'error');
+            originalConsoleError.apply(console, args);
+        };
+
+        function inicializarDebug() {
+            log('🎯 Sistema de debug inicializado', 'success');
+            log('✅ Fetch interceptado para peticiones a Google Apps Script', 'success');
+            log('✅ Console interceptado para ver logs de admin.js', 'success');
+            log('', 'info');
+            log('📋 INSTRUCCIONES:', 'info');
+            log('1. Abre el panel de administración en otra ventana', 'info');
+            log('2. Ve a la sección "Gestión de Mesas"', 'info');
+            log('3. Asigna un invitado a una mesa', 'info');
+            log('4. Observa aquí qué datos se envían', 'info');
+            log('5. Verifica la respuesta del servidor', 'info');
+        }
+
+        // Inicializar automáticamente
+        window.addEventListener('load', () => {
+            inicializarDebug();
+        });
+    </script>
+</body>
+</html>
