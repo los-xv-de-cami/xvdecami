@@ -479,6 +479,9 @@ class AdminPanel {
             total: totalGuests
         });
 
+        // Guardar en Google Sheets
+        this.saveTableAssignment(guest.id, tableNumber);
+
         this.renderTables();
         this.updateGuestSelect();
         this.updateTableSelect();
@@ -507,6 +510,9 @@ class AdminPanel {
                     acompañantes: parseInt(guest.num_acompanantes),
                     total: totalGuests
                 });
+                
+                // Guardar asignación en el servidor
+                await this.saveTableAssignment(guest.id, availableTable.number);
             }
         }
 
@@ -516,11 +522,15 @@ class AdminPanel {
         this.showSuccess('Asignación automática completada');
     }
 
-    clearAssignments() {
+    async clearAssignments() {
         if (confirm('¿Estás seguro de que quieres清除 todas las asignaciones de mesas?')) {
-            this.guests.forEach(guest => {
-                guest.mesa_asignada = null;
-            });
+            // Limpiar asignaciones en el servidor
+            for (const guest of this.guests) {
+                if (guest.mesa_asignada) {
+                    await this.saveTableAssignment(guest.id, '');
+                    guest.mesa_asignada = null;
+                }
+            }
             
             this.tables.forEach(table => {
                 table.guests = [];
@@ -960,6 +970,61 @@ class AdminPanel {
             } else {
                 icon.className = 'fas fa-sync-alt';
             }
+        }
+    }
+
+    // ========================================
+    // FUNCIÓN PARA GUARDAR ASIGNACIONES DE MESAS
+    // ========================================
+
+    async saveTableAssignment(invitadoId, mesaAsignada) {
+        try {
+            console.log('🔍 saveTableAssignment iniciado - ID:', invitadoId, 'Mesa:', mesaAsignada);
+            
+            const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzoI8RJLKUc8Z_GUAIXX_CR0VNFT_3XKyU7LlD6_54QxAXiCzo3isPOu7yxZVmR0so/exec';
+            
+            // Crear FormData para la asignación de mesa
+            const formData = new FormData();
+            formData.append('action', 'updateTableAssignment');
+            formData.append('invitado_id', String(invitadoId));
+            formData.append('mesa_asignada', mesaAsignada !== null ? mesaAsignada.toString() : '');
+
+            console.log('📋 FormData creado:', {
+                action: 'updateTableAssignment',
+                invitado_id: String(invitadoId),
+                mesa_asignada: mesaAsignada !== null ? mesaAsignada.toString() : ''
+            });
+
+            // Enviar al servidor
+            console.log('🌐 Enviando petición a:', WEB_APP_URL);
+            const response = await fetch(WEB_APP_URL, {
+                method: 'POST',
+                body: formData
+            });
+
+            console.log('📡 Respuesta HTTP recibida:', response.status, response.statusText);
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+            console.log('📊 Resultado del servidor:', result);
+            
+            if (result.success) {
+                console.log('✅ Asignación guardada en Google Sheets:', result.message);
+                return { success: true };
+            } else {
+                console.error('❌ Error guardando asignación:', result.error);
+                this.showError('Error guardando asignación: ' + result.error);
+                return { success: false, error: result.error };
+            }
+            
+        } catch (error) {
+            console.error('❌ Error en saveTableAssignment:', error);
+            console.error('Stack trace:', error.stack);
+            this.showError('Error de conexión al guardar asignación: ' + error.message);
+            return { success: false, error: error.message };
         }
     }
 }
