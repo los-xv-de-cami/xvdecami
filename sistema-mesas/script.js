@@ -318,12 +318,13 @@ async function saveChanges() {
         button.classList.add('saving');
         button.querySelector('.btn-text').textContent = 'Guardando...';
         
-        // Prepare data
+        // Prepare data for ALL guests
         const assignmentsData = [];
-        state.assignments.forEach((tableNumber, guestId) => {
+        state.guests.forEach(guest => {
+            const assignedTableNumber = state.assignments.get(guest.id);
             assignmentsData.push({
-                guestId: guestId,
-                tableAssignment: tableNumber.toString()
+                guestId: guest.id,
+                tableAssignment: assignedTableNumber ? assignedTableNumber.toString() : ''
             });
         });
         
