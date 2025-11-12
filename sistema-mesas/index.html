@@ -59,6 +59,27 @@
         </div>
     </div>
 
+    <!-- Debug Panel (Hidden by default) -->
+    <div id="debugPanel" class="debug-panel hidden">
+        <div class="debug-header">
+            <h3>🐛 Panel de Debug</h3>
+            <button onclick="toggleDebugPanel()" class="btn-close">×</button>
+        </div>
+        <div class="debug-content">
+            <div class="debug-actions">
+                <button onclick="testConnection()" class="btn-debug">🧪 Probar Conexión</button>
+                <button onclick="showDebugLogs()" class="btn-debug">📋 Ver Logs</button>
+                <button onclick="clearDebugLogs()" class="btn-debug">🧹 Limpiar Logs</button>
+            </div>
+            <div id="debugOutput" class="debug-output"></div>
+        </div>
+    </div>
+
+    <!-- Debug Toggle Button -->
+    <button id="debugToggle" class="debug-toggle" onclick="toggleDebugPanel()" title="Panel de Debug">
+        🐛
+    </button>
+
     <script src="script.js"></script>
 </body>
 </html>

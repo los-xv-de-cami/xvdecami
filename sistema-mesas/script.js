@@ -109,22 +109,47 @@ function setupEventListeners() {
 }
 
 async function loadGuests() {
+    console.log('🔄 Iniciando carga de invitados...');
+    console.log('📍 URL del Apps Script:', APPS_SCRIPT_URL);
+    
     try {
         const formData = new FormData();
         formData.append('event', LOAD_GUEST_EVENT);
+        
+        console.log('📤 Enviando petición a Apps Script...');
         
         const response = await fetch(APPS_SCRIPT_URL, {
             method: 'POST',
             body: formData
         });
         
+        console.log('📥 Respuesta recibida:', {
+            status: response.status,
+            statusText: response.statusText,
+            ok: response.ok
+        });
+        
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            const errorText = await response.text();
+            console.error('❌ Error HTTP:', errorText);
+            throw new Error(`Error HTTP ${response.status}: ${errorText}`);
         }
         
-        const data = await response.json();
+        const responseText = await response.text();
+        console.log('📄 Respuesta completa (texto):', responseText);
+        
+        let data;
+        try {
+            data = JSON.parse(responseText);
+            console.log('✅ Datos parseados exitosamente:', data);
+        } catch (parseError) {
+            console.error('❌ Error al parsear JSON:', parseError);
+            console.error('📄 Respuesta que falló:', responseText);
+            throw new Error(`Respuesta inválida del servidor: ${responseText.substring(0, 200)}...`);
+        }
         
         if (data.error) {
+            console.error('❌ Error del Apps Script:', data.error);
             throw new Error(data.error);
         }
         
@@ -551,6 +576,112 @@ function showModal(title, content) {
     setTimeout(() => modal.classList.add('show'), 100);
 }
 
+// DEBUG FUNCTIONS
+
+// Toggle debug panel
+function toggleDebugPanel() {
+    const panel = document.getElementById('debugPanel');
+    const toggle = document.getElementById('debugToggle');
+    
+    panel.classList.toggle('hidden');
+    toggle.classList.toggle('hidden');
+    
+    if (!panel.classList.contains('hidden')) {
+        showDebugMessage('🐛 Panel de debug activado');
+    }
+}
+
+// Test connection to Apps Script
+async function testConnection() {
+    const output = document.getElementById('debugOutput');
+    
+    try {
+        showDebugMessage('🧪 Probando conexión con Apps Script...');
+        
+        const formData = new FormData();
+        formData.append('event', 'test');
+        
+        const response = await fetch(APPS_SCRIPT_URL, {
+            method: 'POST',
+            body: formData
+        });
+        
+        const responseText = await response.text();
+        
+        showDebugMessage(`✅ Respuesta recibida:`);
+        showDebugMessage(`Status: ${response.status}`);
+        showDebugMessage(`Text: ${responseText}`);
+        
+        try {
+            const jsonData = JSON.parse(responseText);
+            showDebugMessage(`JSON Parseado: ${JSON.stringify(jsonData, null, 2)}`);
+        } catch (parseError) {
+            showDebugMessage(`❌ Error parseando JSON: ${parseError.message}`);
+        }
+        
+    } catch (error) {
+        showDebugMessage(`❌ Error: ${error.message}`);
+        console.error('Debug test error:', error);
+    }
+}
+
+// Show debug logs
+function showDebugLogs() {
+    const output = document.getElementById('debugOutput');
+    const logs = getDebugLogs();
+    
+    if (logs.length === 0) {
+        showDebugMessage('📋 No hay logs disponibles');
+        return;
+    }
+    
+    showDebugMessage('📋 Últimos logs:');
+    logs.forEach(log => {
+        showDebugMessage(log);
+    });
+}
+
+// Clear debug logs
+function clearDebugLogs() {
+    clearDebugLogStorage();
+    const output = document.getElementById('debugOutput');
+    output.innerHTML = '';
+    showDebugMessage('🧹 Logs limpiados');
+}
+
+// Debug message helper
+function showDebugMessage(message) {
+    const output = document.getElementById('debugOutput');
+    const timestamp = new Date().toLocaleTimeString();
+    const logEntry = `[${timestamp}] ${message}`;
+    
+    output.innerHTML += logEntry + '\n';
+    output.scrollTop = output.scrollHeight;
+    
+    // Store in localStorage for persistence
+    addDebugLog(logEntry);
+}
+
+// Debug log storage
+let debugLogs = JSON.parse(localStorage.getItem('debugLogs') || '[]');
+
+function addDebugLog(log) {
+    debugLogs.push(log);
+    if (debugLogs.length > 100) {
+        debugLogs.shift(); // Keep only last 100 logs
+    }
+    localStorage.setItem('debugLogs', JSON.stringify(debugLogs));
+}
+
+function getDebugLogs() {
+    return debugLogs.slice(-10); // Return last 10 logs
+}
+
+function clearDebugLogStorage() {
+    debugLogs = [];
+    localStorage.removeItem('debugLogs');
+}
+
 function showToast(message, type = 'info') {
     elements.toastMessage.textContent = message;
     elements.toast.className = `toast ${type}`;
@@ -564,4 +695,16 @@ function showToast(message, type = 'info') {
     setTimeout(() => {
         elements.toast.classList.remove('show');
     }, 3000);
+}
+
+// Auto-initialize debug panel (only in development)
+if (window.location.hostname === 'localhost' || window.location.search.includes('debug=true')) {
+    setTimeout(() => {
+        const panel = document.getElementById('debugPanel');
+        const toggle = document.getElementById('debugToggle');
+        
+        if (panel && toggle) {
+            console.log('🐛 Debug panel available - click the 🐛 button to open');
+        }
+    }, 1000);
 }
