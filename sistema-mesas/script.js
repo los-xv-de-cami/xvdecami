@@ -1,4 +1,4 @@
-// Application State
+// Application State gh
 const state = {
     guests: [],
     assignments: new Map(), // guestId -> tableNumber
