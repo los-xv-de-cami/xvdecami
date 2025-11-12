@@ -184,6 +184,41 @@ body {
     content: "👥 ";
 }
 
+/* Botón para eliminar invitado de la mesa */
+.remove-guest-btn {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 20px;
+    height: 20px;
+    border: none;
+    background: #ff4757;
+    color: white;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: all 0.2s ease;
+}
+
+.guest-card:hover .remove-guest-btn {
+    opacity: 1;
+}
+
+.remove-guest-btn:hover {
+    background: #ff3838;
+    transform: scale(1.1);
+}
+
+/* Asegurar que el card de invitado en mesa tenga posición relativa */
+.guest-card.table-guest {
+    position: relative;
+}
+
 .table-guest {
     background: rgba(0, 87, 255, 0.05);
     border-left: 3px solid var(--primary-500);
