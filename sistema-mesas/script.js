@@ -160,7 +160,7 @@ async function loadGuests() {
             .map(guest => ({
                 id: guest.id,
                 name: guest.name,
-                companions: guest.companions ? guest.companions.split(',').map(c => c.trim()).filter(c => c) : []
+                companions: guest.companions ? (typeof guest.companions === 'string' ? guest.companions.split(',').map(c => c.trim()).filter(c => c) : Array.from({ length: parseInt(guest.companions) }, (_, i) => `Acompañante ${i + 1}`)) : []
             }));
         
         // Load existing assignments
