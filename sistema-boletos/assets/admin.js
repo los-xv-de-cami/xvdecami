@@ -18,6 +18,12 @@ class AdminPanel {
     }
 
     init() {
+        // Asegurar que la URL de Google Apps Script esté configurada correctamente
+        if (!this.config.scriptUrl) {
+            this.config.scriptUrl = 'https://script.google.com/macros/s/AKfycbxnrOFAIQ9nGKrdw6YcR5_mmM8bLEPlHE1ab0eqAyEqwzyusi4AnEsPr0xcgBXVn5QW/exec';
+            console.log('🔧 URL de Google Apps Script configurada automáticamente');
+        }
+        
         this.bindEvents();
         this.initializeTables();
         this.loadData();
@@ -446,8 +452,14 @@ class AdminPanel {
     }
 
     assignGuestToTable() {
+        console.log('🎯 assignGuestToTable() llamada - Verificando elementos...');
+        console.log('guestSelect:', document.getElementById('guestSelect'));
+        console.log('tableSelect:', document.getElementById('tableSelect'));
+        
         const guestId = document.getElementById('guestSelect').value;
         const tableNumber = parseInt(document.getElementById('tableSelect').value);
+
+        console.log('📋 guestId:', guestId, 'tableNumber:', tableNumber);
 
         if (!guestId || !tableNumber) {
             this.showError('Por favor selecciona un invitado y una mesa');
@@ -893,7 +905,11 @@ class AdminPanel {
     // ========================================
 
     async loadGuestsFromGoogleSheets() {
-        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzoI8RJLKUc8Z_GUAIXX_CR0VNFT_3XKyU7LlD6_54QxAXiCzo3isPOu7yxZVmR0so/exec';
+        // Usar la configuración guardada o URL por defecto
+        const WEB_APP_URL = this.config.scriptUrl || 'https://script.google.com/macros/s/AKfycbzoI8RJLKUc8Z_GUAIXX_CR0VNFT_3XKyU7LlD6_54QxAXiCzo3isPOu7yxZVmR0so/exec';
+        
+        console.log('🔍 Cargando datos desde:', WEB_APP_URL);
+        console.log('🔧 Config scriptUrl:', this.config.scriptUrl);
         
         try {
             // Realizar petición GET para obtener datos
@@ -909,15 +925,18 @@ class AdminPanel {
             }
 
             const result = await response.json();
+            console.log('📊 Datos recibidos:', result);
             
             if (result.success && result.data) {
                 this.guests = this.formatGuestsData(result.data);
+                console.log('✅ Datos cargados correctamente:', this.guests.length, 'invitados');
             } else {
                 throw new Error(result.error || 'No se pudieron obtener los datos');
             }
             
         } catch (error) {
             console.error('Error cargando desde Google Sheets:', error);
+            console.error('URL usada:', WEB_APP_URL);
             // Fallback a datos mock si falla la conexión
             this.guests = this.getMockGuests();
             this.showError('Usando datos de prueba - Error de conexión: ' + error.message);
@@ -981,7 +1000,8 @@ class AdminPanel {
         try {
             console.log('🔍 saveTableAssignment iniciado - ID:', invitadoId, 'Mesa:', mesaAsignada);
             
-            const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzoI8RJLKUc8Z_GUAIXX_CR0VNFT_3XKyU7LlD6_54QxAXiCzo3isPOu7yxZVmR0so/exec';
+            const WEB_APP_URL = this.config.scriptUrl || 'https://script.google.com/macros/s/AKfycbzoI8RJLKUc8Z_GUAIXX_CR0VNFT_3XKyU7LlD6_54QxAXiCzo3isPOu7yxZVmR0so/exec';
+            console.log('🔧 URL de configuración:', this.config.scriptUrl, '| URL final:', WEB_APP_URL);
             
             // Crear FormData para la asignación de mesa
             const formData = new FormData();
