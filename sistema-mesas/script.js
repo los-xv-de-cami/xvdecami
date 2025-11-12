@@ -100,12 +100,13 @@ function setupEventListeners() {
     // Save button
     elements.saveButton.addEventListener('click', saveChanges);
     
-    // Refresh data every 30 seconds for multi-user support
-   // setInterval(async () => {
-   //     await loadGuests();
-   //     renderGuestList();
-   //     renderTables();
-   // }, 30000);
+    // REMOVIDO: Refresh data every 30 seconds for multi-user support
+    // Como solo un usuario manejará las asignaciones, este refresh se eliminó
+    // setInterval(async () => {
+    //     await loadGuests();
+    //     renderGuestList();
+    //     renderTables();
+    // }, 30000);
 }
 
 async function loadGuests() {
@@ -218,6 +219,7 @@ function createGuestCard(guest, isOnTable) {
     card.innerHTML = `
         <div class="guest-main">${guest.name}</div>
         ${companionsText ? `<div class="guest-companions">${companionsText}</div>` : ''}
+        ${isOnTable ? `<button class="remove-guest-btn" onclick="removeGuestFromTable('${guest.id}')" title="Quitar de la mesa">×</button>` : ''}
     `;
     
     // Setup drag and drop for this guest
@@ -393,6 +395,8 @@ function removeGuestFromTable(guestId) {
         if (guest) {
             showToast(`${guest.name} removido de Mesa ${tableNumber}`);
         }
+    } else {
+        console.warn('Invitado no encontrado en asignaciones:', guestId);
     }
 }
 
@@ -711,4 +715,3 @@ if (window.location.hostname === 'localhost' || window.location.search.includes(
             console.log('🐛 Debug panel available - click the 🐛 button to open');
         }
     }, 1000);
-}
